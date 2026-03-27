@@ -57,6 +57,13 @@
   .kpi-l{font-size:9px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;}
   .lang-switch-btn{background:none;border:1px solid var(--border2);color:var(--muted);padding:6px 12px;font-size:10px;font-family:'DM Mono',monospace;cursor:pointer;letter-spacing:0.1em;transition:all 0.15s;}
   .lang-switch-btn:hover{border-color:var(--gold);color:var(--gold);}
+  .settings-btn{background:none;border:1px solid var(--border2);color:var(--muted);width:32px;height:32px;display:grid;place-items:center;font-size:15px;cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+  .settings-btn:hover{border-color:var(--gold);color:var(--gold);}
+  .score-pill{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;padding:2px 6px;letter-spacing:0.06em;margin-right:3px;}
+  .score-good{background:var(--green-dim);color:var(--green);}
+  .score-med{background:rgba(251,191,36,0.1);color:#fbbf24;}
+  .score-bad{background:var(--red-dim);color:var(--red);}
+  .field{margin-bottom:16px;}
 
   /* Steps */
   .steps{display:flex;border:1px solid var(--border);margin-bottom:28px;overflow:hidden;}
@@ -240,6 +247,7 @@
         <div class="kpi"><div class="kpi-n" id="kpi-sent">0</div><div class="kpi-l" id="kpi-l3">Sent</div></div>
       </div>
       <button class="lang-switch-btn" onclick="switchLang()" id="lang-switch-btn">🌐 ES</button>
+      <button class="settings-btn" onclick="openSettings()" title="Configuración / Settings">⚙</button>
     </div>
   </header>
 
@@ -324,16 +332,17 @@
       <div class="chip active" onclick="setFilter('all',this)" id="f-all">All</div>
       <div class="chip" onclick="setFilter('pending',this)" id="f-pending">Pending</div>
       <div class="chip" onclick="setFilter('sent',this)" id="f-sent">Sent</div>
+      <div class="chip" onclick="setFilter('weak',this)" id="f-weak">Con web</div>
       <div class="fsearch"><input type="text" id="search-input" placeholder="Search..." oninput="searchLeads(this.value)"></div>
     </div>
-    <div class="table-top">
+    <div class="table-top" id="tbl-top-main">
       <div class="table-title" id="tbl-title">Leads without website <span class="badge" id="leads-badge">0</span></div>
       <div class="tactions">
         <button class="btn btn-ghost" id="btn-export" onclick="exportCSV()" disabled>↓ Export</button>
         <button class="btn btn-outline" id="btn-step4" onclick="goStep(4)" disabled>Send WhatsApp →</button>
       </div>
     </div>
-    <div class="table-wrap">
+    <div class="table-wrap" id="main-table-wrap">
       <table>
         <thead><tr>
           <th>#</th>
@@ -346,6 +355,27 @@
         </tr></thead>
         <tbody id="leads-tbody"></tbody>
       </table>
+    </div>
+
+    <!-- Weak website section (shown when filter = 'weak') -->
+    <div id="weak-section" style="display:none;">
+      <div class="table-top">
+        <div class="table-title" id="weak-title">Con sitio web <span class="badge" id="weak-badge">0</span></div>
+        <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;" id="weak-hint">Analizá su web antes de agregarlos como prospecto</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>#</th>
+            <th id="wth-name">Negocio</th>
+            <th id="wth-cat">Rubro</th>
+            <th id="wth-site">Sitio web</th>
+            <th id="wth-score">Análisis SEO</th>
+            <th id="wth-action">Acción</th>
+          </tr></thead>
+          <tbody id="weak-tbody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -411,6 +441,33 @@
   </div>
 </div>
 
+<div class="overlay" id="modal-settings">
+  <div class="modal" style="max-width:520px;">
+    <h3 id="mset-title">⚙ Configuración</h3>
+    <div class="modal-body" style="margin-bottom:0;">
+      <div style="font-size:12px;line-height:1.8;margin-bottom:18px;">
+        Para guardar prospectos en <strong style="color:var(--gold)">Notion</strong> automáticamente, conectá un webhook de <strong>Make.com</strong> (gratis, 1000 ops/mes).<br>
+        <span style="font-size:10px;color:var(--muted);">En Make: Crear escenario → Webhooks (trigger) → Notion "Create a database item"</span>
+      </div>
+      <div class="field">
+        <label id="mset-wh-label">Make.com Webhook URL</label>
+        <input type="url" id="webhook-url" placeholder="https://hook.eu1.make.com/..." style="font-family:'DM Mono',monospace;font-size:12px;">
+      </div>
+      <div id="webhook-status" style="font-family:'DM Mono',monospace;font-size:10px;padding:6px 10px;border:1px solid var(--border2);display:none;margin-top:-6px;margin-bottom:12px;"></div>
+      <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;line-height:2;padding:10px;background:var(--bg);border:1px solid var(--border2);">
+        <span style="color:var(--gold)">Soledad</span> → idioma ES → agente "Soledad" en Notion<br>
+        <span style="color:var(--gold)">Silvina</span> → idioma IT → agente "Silvina" en Notion<br>
+        <span style="color:var(--gold)">Link Soledad:</span> <span id="mset-link-es" style="color:var(--blue);">...</span><br>
+        <span style="color:var(--gold)">Link Silvina:</span> <span id="mset-link-it" style="color:var(--blue);">...</span>
+      </div>
+    </div>
+    <div class="modal-foot" style="margin-top:18px;">
+      <button class="btn btn-ghost" onclick="closeModal('modal-settings')" id="mset-cancel">Cancelar</button>
+      <button class="btn btn-gold" onclick="saveSettings()" id="mset-save">Guardar →</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -465,7 +522,14 @@ const T = {
     csvStatus: {
       empty: 'The file seems empty.',
       ok: (t,l) => `✓ ${t} businesses imported · ${l} without website`
-    }
+    },
+    fWeak:'With website', weakTitle:'With website · check quality',
+    weakHint:'Analyze their site before adding as a lead',
+    wthName:'Business', wthCat:'Category', wthSite:'Website', wthScore:'SEO Analysis', wthAction:'Action',
+    btnAnalyze:'Analyze', btnAddLead:'+ Add as lead',
+    toastAdded:'added as lead',
+    settingsTitle:'⚙ Settings',
+    notionSynced:'✓ Saved in Notion',
   },
 
   es: {
@@ -514,6 +578,13 @@ const T = {
     switchLabel:'🌐 ES',
     noPhone:'sin tel',
     searchPlaceholder:'Buscar...',
+    fWeak:'Con web', weakTitle:'Con sitio web · revisar calidad',
+    weakHint:'Analizá su web antes de agregar como prospecto',
+    wthName:'Negocio', wthCat:'Rubro', wthSite:'Sitio web', wthScore:'Análisis SEO', wthAction:'Acción',
+    btnAnalyze:'Analizar', btnAddLead:'+ Agregar',
+    toastAdded:'agregado como prospecto',
+    settingsTitle:'⚙ Configuración',
+    notionSynced:'✓ Guardado en Notion',
   },
 
   it: {
@@ -562,6 +633,13 @@ const T = {
     switchLabel:'🌐 IT',
     noPhone:'nessun tel',
     searchPlaceholder:'Cerca...',
+    fWeak:'Con sito', weakTitle:'Con sito web · verifica qualità',
+    weakHint:'Analizza il sito prima di aggiungere come lead',
+    wthName:'Attività', wthCat:'Categoria', wthSite:'Sito web', wthScore:'Analisi SEO', wthAction:'Azione',
+    btnAnalyze:'Analizza', btnAddLead:'+ Aggiungi',
+    toastAdded:'aggiunto come lead',
+    settingsTitle:'⚙ Impostazioni',
+    notionSynced:'✓ Salvato in Notion',
   },
 
   de: {
@@ -610,6 +688,13 @@ const T = {
     switchLabel:'🌐 DE',
     noPhone:'kein Tel.',
     searchPlaceholder:'Suchen...',
+    fWeak:'Mit Website', weakTitle:'Mit Website · Qualität prüfen',
+    weakHint:'Analysiere die Website bevor du als Lead hinzufügst',
+    wthName:'Unternehmen', wthCat:'Branche', wthSite:'Website', wthScore:'SEO-Analyse', wthAction:'Aktion',
+    btnAnalyze:'Analysieren', btnAddLead:'+ Hinzufügen',
+    toastAdded:'als Lead hinzugefügt',
+    settingsTitle:'⚙ Einstellungen',
+    notionSynced:'✓ In Notion gespeichert',
   },
 
   sk: {
@@ -663,7 +748,7 @@ const T = {
 
 // ── App state ─────────────────────────────────────────────────────
 let lang = 'en';
-let allLeads = [], leads = [], filterMode = 'all', searchQuery = '';
+let allLeads = [], leads = [], weakLeads = [], filterMode = 'all', searchQuery = '';
 
 // ── Lang selection ────────────────────────────────────────────────
 function selectLang(l) {
@@ -694,10 +779,15 @@ function applyLang() {
   s('upload-head', t.uploadHead); s('upload-title', t.uploadTitle); s('upload-sub', t.uploadSub);
   s('demo-text', t.demoText); s('demo-btn', t.demoBtn);
   s('tbl-title', `${t.tblTitle} <span class="badge" id="leads-badge">${leads.length}</span>`);
-  s('f-all', t.fAll); s('f-pending', t.fPending); s('f-sent', t.fSent);
+  s('f-all', t.fAll); s('f-pending', t.fPending); s('f-sent', t.fSent); s('f-weak', t.fWeak||'Con web');
   s('th-name', t.thName); s('th-cat', t.thCat); s('th-addr', t.thAddr);
   s('th-phone', t.thPhone); s('th-status', t.thStatus); s('th-action', t.thAction);
   s('btn-export', t.btnExport); s('btn-step4', t.btnStep4);
+  s('weak-title', `${t.weakTitle||'Con web'} <span class="badge" id="weak-badge">${weakLeads.length}</span>`);
+  s('weak-hint', t.weakHint||'');
+  s('wth-name', t.wthName||''); s('wth-cat', t.wthCat||''); s('wth-site', t.wthSite||'');
+  s('wth-score', t.wthScore||''); s('wth-action', t.wthAction||'');
+  s('mset-title', t.settingsTitle||'⚙ Settings');
   s('tpl-head', t.tplHead); s('tpl-label', t.tplLabel); s('vars-label', t.varsLabel);
   s('btn-bulk', t.bulkBtn); s('btn-preview', t.previewBtn);
   s('pending-title', `${t.pendingTitle} <span class="badge" id="pending-badge">0</span>`);
@@ -754,6 +844,7 @@ function parseCSV(text) {
     allLeads.push({ id:i, name, phone, site, category: iC>=0?cl(cols[iC]):'—', address: iA>=0?cl(cols[iA]):'—', rating: iR>=0?cl(cols[iR]):'—', hasWebsite: site.length>3, status:'pending' });
   }
   leads = allLeads.filter(l => !l.hasWebsite && l.phone);
+  weakLeads = allLeads.filter(l => l.hasWebsite && l.phone);
   updateStats();
   showCSVStatus(t.statusOk(allLeads.length, leads.length));
   document.getElementById('btn-export').disabled = leads.length === 0;
@@ -798,7 +889,20 @@ function setFilter(mode, el) {
   filterMode = mode;
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
-  renderTable();
+  const weakSec = document.getElementById('weak-section');
+  const mainWrap = document.getElementById('main-table-wrap');
+  const mainTop = document.getElementById('tbl-top-main');
+  if (mode === 'weak') {
+    if (weakSec) weakSec.style.display = 'block';
+    if (mainWrap) mainWrap.style.display = 'none';
+    if (mainTop) mainTop.style.display = 'none';
+    renderWeak();
+  } else {
+    if (weakSec) weakSec.style.display = 'none';
+    if (mainWrap) mainWrap.style.display = '';
+    if (mainTop) mainTop.style.display = '';
+    renderTable();
+  }
 }
 function searchLeads(q) { searchQuery = q.toLowerCase(); renderTable(); }
 function getVisible() {
@@ -867,6 +971,7 @@ function sendOne(idx) {
   const phone = l.phone.replace(/[\s\-()]/g,'').replace(/^\+/,'').replace(/^0+/,'');
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(buildMsg(l))}`, '_blank');
   allLeads[idx].status = 'sent';
+  fireWebhook(l, 'whatsapp_enviado');
   updateStats(); renderTable(); renderPending();
   toast(`${T[lang].toastSent} ${l.name}`);
 }
@@ -933,6 +1038,135 @@ function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
 // Auto-detect lang from URL param e.g. ?lang=es
 const urlLang = new URLSearchParams(window.location.search).get('lang');
 if (urlLang && T[urlLang]) selectLang(urlLang);
+
+// ── Settings & Notion webhook ──────────────────────────────────────
+function openSettings() {
+  document.getElementById('webhook-url').value = localStorage.getItem('kp_webhook') || '';
+  const status = document.getElementById('webhook-status');
+  const saved = localStorage.getItem('kp_webhook');
+  if (saved) {
+    status.style.display = 'block';
+    status.style.color = 'var(--green)';
+    status.style.borderColor = 'var(--green)';
+    status.textContent = '✓ Webhook configurado: ' + saved.slice(0,40) + '...';
+  } else {
+    status.style.display = 'block';
+    status.style.color = 'var(--muted)';
+    status.style.borderColor = 'var(--border2)';
+    status.textContent = '· Sin webhook — los mensajes no se guardarán en Notion';
+  }
+  // Show direct links for each agent
+  const base = window.location.origin + window.location.pathname;
+  const esEl = document.getElementById('mset-link-es');
+  const itEl = document.getElementById('mset-link-it');
+  if (esEl) esEl.textContent = base + '?lang=es';
+  if (itEl) itEl.textContent = base + '?lang=it';
+  document.getElementById('modal-settings').classList.add('open');
+}
+
+function saveSettings() {
+  const url = document.getElementById('webhook-url').value.trim();
+  if (url) {
+    localStorage.setItem('kp_webhook', url);
+    toast('✓ Webhook guardado en Notion');
+  } else {
+    localStorage.removeItem('kp_webhook');
+    toast('Webhook eliminado');
+  }
+  closeModal('modal-settings');
+}
+
+async function fireWebhook(lead, action) {
+  const webhookUrl = localStorage.getItem('kp_webhook');
+  if (!webhookUrl) return;
+  const agente = lang === 'es' ? 'Soledad' : lang === 'it' ? 'Silvina' : 'Kosmos';
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre: lead.name,
+        telefono: lead.phone,
+        rubro: lead.category,
+        direccion: lead.address,
+        sitio_web: lead.site || '',
+        accion: action,
+        fecha: new Date().toLocaleString(),
+        agente: agente,
+        idioma: lang,
+        rating: lead.rating || ''
+      })
+    });
+    toast((T[lang].notionSynced || '✓ Notion') + ' · ' + lead.name);
+  } catch(e) { /* silent — no internet or wrong URL */ }
+}
+
+// ── Weak leads (businesses with website) ──────────────────────────
+function renderWeak() {
+  const t = T[lang];
+  const tbody = document.getElementById('weak-tbody');
+  if (!tbody) return;
+  const wb = document.getElementById('weak-badge');
+  if (wb) wb.textContent = weakLeads.length;
+  if (!weakLeads.length) {
+    const msg = leads.length === 0 && weakLeads.length === 0
+      ? (t.emptyTable || 'Import a CSV to see leads.')
+      : 'No hay negocios con sitio web en este CSV.';
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><div class="empty-icon">◈</div><div class="empty-text">${msg}</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = weakLeads.map((l, i) => {
+    const shortSite = (l.site||'').replace(/^https?:\/\//,'').replace(/\/$/,'').slice(0,35);
+    let scoreHtml = '';
+    if (l.perfScore !== undefined) {
+      const pc = l.perfScore >= 70 ? 'score-good' : l.perfScore >= 50 ? 'score-med' : 'score-bad';
+      const sc = l.seoScore >= 80 ? 'score-good' : l.seoScore >= 60 ? 'score-med' : 'score-bad';
+      scoreHtml = `<span class="score-pill ${pc}">Perf ${l.perfScore}</span><span class="score-pill ${sc}">SEO ${l.seoScore}</span>`;
+    } else {
+      scoreHtml = `<button class="wa-btn" onclick="checkSEO(${i})">${t.btnAnalyze||'Analizar'}</button>`;
+    }
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">${String(i+1).padStart(2,'0')}</td>
+      <td class="td-name">${l.name}</td>
+      <td class="td-cat">${l.category}</td>
+      <td><a href="${l.site}" target="_blank" style="color:var(--blue);font-family:'DM Mono',monospace;font-size:11px;">${shortSite}</a></td>
+      <td>${scoreHtml}</td>
+      <td>${l.phone ? `<button class="btn btn-outline" style="padding:5px 10px;font-size:9px;" onclick="addWeakAsLead(${i})">${t.btnAddLead||'+ Agregar'}</button>` : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function checkSEO(idx) {
+  const lead = weakLeads[idx];
+  if (!lead || !lead.site) return;
+  const tbody = document.getElementById('weak-tbody');
+  const btn = tbody ? tbody.querySelector(`tr:nth-child(${idx+1}) .wa-btn`) : null;
+  if (btn) { btn.textContent = '...'; btn.disabled = true; }
+  try {
+    const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(lead.site)}&strategy=mobile&category=performance&category=seo`;
+    const res = await fetch(apiUrl);
+    const data = await res.json();
+    lead.perfScore = Math.round(((data?.lighthouseResult?.categories?.performance?.score) || 0) * 100);
+    lead.seoScore = Math.round(((data?.lighthouseResult?.categories?.seo?.score) || 0) * 100);
+  } catch(e) {
+    lead.perfScore = 0; lead.seoScore = 0;
+  }
+  renderWeak();
+}
+
+function addWeakAsLead(idx) {
+  const lead = weakLeads[idx];
+  if (!lead) return;
+  lead.hasWebsite = false;
+  leads.push(lead);
+  weakLeads.splice(idx, 1);
+  updateStats();
+  renderWeak();
+  renderTable();
+  document.getElementById('btn-export').disabled = false;
+  document.getElementById('btn-step4').disabled = false;
+  toast(`${lead.name} — ${T[lang].toastAdded || 'agregado como prospecto'}`);
+}
 </script>
 </body>
 </html>
