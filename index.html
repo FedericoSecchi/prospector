@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kosmos Prospector</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#080808; --surface:#111; --border:#1e1e1e; --border2:#2a2a2a;
+    --gold:#c9a96e; --gold-dim:rgba(201,169,110,0.12); --gold-glow:rgba(201,169,110,0.05);
+    --text:#f0ebe0; --muted:#555; --muted2:#2a2a2a;
+    --green:#4ade80; --green-dim:rgba(74,222,128,0.1);
+    --red:#f87171; --red-dim:rgba(248,113,113,0.1);
+    --blue:#7dd3fc;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;
+    background-image:linear-gradient(rgba(201,169,110,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(201,169,110,0.025) 1px,transparent 1px);
+    background-size:52px 52px;pointer-events:none;z-index:0;}
+
+  .app{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:32px 20px 80px;}
+
+  /* Lang selector screen */
+  #lang-screen{
+    position:fixed;inset:0;z-index:1000;background:var(--bg);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;padding:24px;
+  }
+  .lang-logo{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
+  .lang-diamond{width:42px;height:42px;border:1px solid var(--gold);display:grid;place-items:center;transform:rotate(45deg);}
+  .lang-diamond span{transform:rotate(-45deg);color:var(--gold);font-size:18px;}
+  .lang-title{font-size:20px;font-weight:800;letter-spacing:0.06em;}
+  .lang-sub{font-size:10px;color:var(--muted);letter-spacing:0.2em;text-transform:uppercase;font-family:'DM Mono',monospace;}
+  .lang-prompt{font-size:13px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;font-family:'DM Mono',monospace;}
+  .lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:480px;}
+  .lang-btn{
+    background:var(--surface);border:1px solid var(--border2);padding:20px 16px;
+    cursor:pointer;transition:all 0.2s;text-align:left;
+  }
+  .lang-btn:hover{border-color:var(--gold);background:var(--gold-dim);}
+  .lang-flag{font-size:24px;margin-bottom:8px;}
+  .lang-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;}
+  .lang-person{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+
+  /* Header */
+  .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;padding-bottom:20px;border-bottom:1px solid var(--border);}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .diamond{width:34px;height:34px;border:1px solid var(--gold);display:grid;place-items:center;transform:rotate(45deg);}
+  .diamond span{transform:rotate(-45deg);color:var(--gold);font-size:14px;}
+  .brand-name{font-size:16px;font-weight:800;letter-spacing:0.05em;}
+  .brand-tag{font-size:9px;color:var(--muted);letter-spacing:0.2em;text-transform:uppercase;font-family:'DM Mono',monospace;margin-top:2px;}
+  .header-right{display:flex;align-items:center;gap:16px;}
+  .kpis{display:flex;gap:20px;}
+  .kpi{text-align:right;}
+  .kpi-n{font-size:20px;font-weight:700;font-family:'DM Mono',monospace;color:var(--gold);}
+  .kpi-l{font-size:9px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;}
+  .lang-switch-btn{background:none;border:1px solid var(--border2);color:var(--muted);padding:6px 12px;font-size:10px;font-family:'DM Mono',monospace;cursor:pointer;letter-spacing:0.1em;transition:all 0.15s;}
+  .lang-switch-btn:hover{border-color:var(--gold);color:var(--gold);}
+  .settings-btn{background:none;border:1px solid var(--border2);color:var(--muted);width:32px;height:32px;display:grid;place-items:center;font-size:15px;cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+  .settings-btn:hover{border-color:var(--gold);color:var(--gold);}
+  .score-pill{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;padding:2px 6px;letter-spacing:0.06em;margin-right:3px;}
+  .score-good{background:var(--green-dim);color:var(--green);}
+  .score-med{background:rgba(251,191,36,0.1);color:#fbbf24;}
+  .score-bad{background:var(--red-dim);color:var(--red);}
+  .field{margin-bottom:16px;}
+
+  /* Steps */
+  .steps{display:flex;border:1px solid var(--border);margin-bottom:28px;overflow:hidden;}
+  .step{flex:1;padding:14px 16px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:0.04em;cursor:pointer;transition:background 0.2s;border-right:1px solid var(--border);color:var(--muted);user-select:none;}
+  .step:last-child{border-right:none;}
+  .step.active{background:var(--gold-dim);color:var(--gold);}
+  .step.done{color:var(--green);}
+  .step-num{width:20px;height:20px;border:1px solid currentColor;display:grid;place-items:center;font-size:9px;font-family:'DM Mono',monospace;flex-shrink:0;}
+
+  /* Panels */
+  .panel{background:var(--surface);border:1px solid var(--border);padding:24px;margin-bottom:16px;}
+  .panel-head{font-size:9px;font-family:'DM Mono',monospace;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+  .panel-head::before{content:'';width:12px;height:1px;background:var(--gold);}
+
+  /* Instruction cards */
+  .inst-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;}
+  .inst-card{background:var(--surface);border:1px solid var(--border);padding:18px;}
+  .inst-n{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:0.1em;margin-bottom:8px;}
+  .inst-t{font-size:13px;font-weight:700;margin-bottom:6px;}
+  .inst-d{font-size:12px;color:var(--muted);line-height:1.65;}
+  .inst-link{color:var(--gold);text-decoration:none;font-size:12px;}
+  .inst-link:hover{text-decoration:underline;}
+
+  /* Queries box */
+  .queries-box{background:var(--bg);border:1px solid var(--border2);padding:16px;font-family:'DM Mono',monospace;font-size:12px;line-height:2;color:var(--muted);margin-top:12px;}
+  .q-label{color:var(--gold);}
+
+  /* Upload */
+  .upload-zone{border:1px dashed var(--border2);padding:44px 28px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;}
+  .upload-zone:hover,.upload-zone.drag{border-color:var(--gold);background:var(--gold-glow);}
+  .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .upload-icon{font-size:26px;margin-bottom:10px;opacity:0.45;}
+  .upload-title{font-size:15px;font-weight:700;margin-bottom:6px;}
+  .upload-sub{font-size:12px;color:var(--muted);line-height:1.65;}
+  .upload-link{color:var(--gold);text-decoration:none;}
+
+  /* Fields */
+  label{display:block;font-size:9px;font-family:'DM Mono',monospace;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+  input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:11px 13px;font-size:14px;font-family:'Syne',sans-serif;outline:none;transition:border-color 0.2s;appearance:none;}
+  input:focus,select:focus,textarea:focus{border-color:var(--gold);}
+  select option{background:#111;}
+  textarea{resize:vertical;min-height:110px;font-size:13px;line-height:1.7;font-family:'DM Mono',monospace;}
+
+  /* Buttons */
+  .btn{padding:11px 20px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;font-family:'Syne',sans-serif;cursor:pointer;border:none;transition:all 0.18s;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;}
+  .btn-gold{background:var(--gold);color:#080808;}
+  .btn-gold:hover{background:#d4b47a;}
+  .btn-gold:disabled{background:var(--muted2);color:var(--muted);cursor:not-allowed;}
+  .btn-outline{background:transparent;color:var(--gold);border:1px solid var(--gold);}
+  .btn-outline:hover{background:var(--gold-dim);}
+  .btn-outline:disabled{opacity:.3;cursor:not-allowed;}
+  .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border2);}
+  .btn-ghost:hover{color:var(--text);border-color:var(--muted);}
+
+  /* Filter */
+  .filter-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);margin-bottom:14px;flex-wrap:wrap;}
+  .chip{padding:4px 11px;font-size:9px;font-family:'DM Mono',monospace;letter-spacing:0.08em;border:1px solid var(--border2);cursor:pointer;transition:all 0.15s;color:var(--muted);background:transparent;text-transform:uppercase;}
+  .chip.active{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
+  .fsearch{margin-left:auto;}
+  .fsearch input{width:160px;padding:6px 11px;font-size:12px;}
+
+  /* Table */
+  .table-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .table-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:10px;}
+  .badge{background:var(--gold-dim);color:var(--gold);font-size:9px;font-family:'DM Mono',monospace;padding:2px 8px;letter-spacing:0.1em;}
+  .tactions{display:flex;gap:8px;}
+  .table-wrap{background:var(--surface);border:1px solid var(--border);overflow:auto;max-height:480px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead{position:sticky;top:0;z-index:2;}
+  thead tr{background:var(--surface);border-bottom:1px solid var(--border2);}
+  th{padding:9px 13px;text-align:left;font-size:8px;font-family:'DM Mono',monospace;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);font-weight:400;}
+  td{padding:11px 13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:var(--gold-glow);}
+  .td-name{font-weight:600;max-width:180px;}
+  .td-cat{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+  .td-phone{font-family:'DM Mono',monospace;font-size:11px;color:var(--blue);}
+  .td-addr{font-size:11px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tag{display:inline-block;font-size:8px;font-family:'DM Mono',monospace;letter-spacing:0.1em;padding:3px 7px;text-transform:uppercase;}
+  .tag-sent{background:var(--green-dim);color:var(--green);}
+  .tag-pending{background:var(--gold-dim);color:var(--gold);}
+  .wa-btn{background:none;border:1px solid var(--border2);color:var(--muted);padding:5px 10px;font-size:10px;font-family:'DM Mono',monospace;cursor:pointer;transition:all 0.15s;}
+  .wa-btn:hover{border-color:var(--green);color:var(--green);}
+  .wa-btn.sent{border-color:var(--green);color:var(--green);cursor:default;}
+
+  .empty{padding:48px 24px;text-align:center;color:var(--muted);}
+  .empty-icon{font-size:26px;margin-bottom:10px;opacity:0.3;}
+  .empty-text{font-size:12px;line-height:1.7;}
+
+  /* Template */
+  .tpl-vars{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .tpl-var{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);background:var(--gold-dim);padding:3px 9px;cursor:pointer;}
+  .tpl-var:hover{opacity:0.7;}
+  .bulk-foot{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+  .bulk-info{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:200;display:none;align-items:center;justify-content:center;padding:24px;}
+  .overlay.open{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border2);padding:28px;width:100%;max-width:480px;}
+  .modal h3{font-size:15px;font-weight:700;margin-bottom:8px;}
+  .modal-body{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:18px;}
+  .modal-pre{background:var(--bg);border:1px solid var(--border);padding:14px;font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);white-space:pre-wrap;line-height:1.7;margin-bottom:18px;max-height:240px;overflow:auto;}
+  .modal-foot{display:flex;gap:10px;justify-content:flex-end;}
+
+  /* Status */
+  #csv-status{margin-top:12px;font-family:'DM Mono',monospace;font-size:12px;display:none;}
+
+  /* Toast */
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--green);color:var(--green);padding:10px 18px;font-family:'DM Mono',monospace;font-size:11px;z-index:300;transform:translateY(60px);opacity:0;transition:all 0.3s;}
+  .toast.show{transform:translateY(0);opacity:1;}
+
+  ::-webkit-scrollbar{width:4px;height:4px;}
+  ::-webkit-scrollbar-track{background:var(--bg);}
+  ::-webkit-scrollbar-thumb{background:var(--muted2);}
+
+  @media(max-width:640px){
+    .inst-grid{grid-template-columns:1fr;}
+    .lang-grid{grid-template-columns:1fr;}
+    .steps .step span.step-label{display:none;}
+    .kpis{gap:12px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Language selector ── -->
+<div id="lang-screen">
+  <div class="lang-logo">
+    <div class="lang-diamond"><span>✦</span></div>
+    <div>
+      <div class="lang-title">KOSMOS PROSPECTOR</div>
+      <div class="lang-sub">Lead Hunter · somoskosmos.com</div>
+    </div>
+  </div>
+  <div class="lang-prompt" id="ls-prompt">Select your language / Elegí tu idioma</div>
+  <div class="lang-grid">
+    <div class="lang-btn" onclick="selectLang('es')">
+      <div class="lang-flag">🇦🇷</div>
+      <div class="lang-name">Español</div>
+      <div class="lang-person">Soledad · Argentina</div>
+    </div>
+    <div class="lang-btn" onclick="selectLang('it')">
+      <div class="lang-flag">🇮🇹</div>
+      <div class="lang-name">Italiano</div>
+      <div class="lang-person">Silvina · Italia</div>
+    </div>
+    <div class="lang-btn" onclick="selectLang('de')">
+      <div class="lang-flag">🇩🇪</div>
+      <div class="lang-name">Deutsch</div>
+      <div class="lang-person">Domi · Deutschland · Schweiz</div>
+    </div>
+    <div class="lang-btn" onclick="selectLang('sk')">
+      <div class="lang-flag">🇸🇰</div>
+      <div class="lang-name">Slovenčina</div>
+      <div class="lang-person">Domi · Slovensko</div>
+    </div>
+    <div class="lang-btn" onclick="selectLang('en')" style="grid-column:span 2;">
+      <div class="lang-flag">🌐</div>
+      <div class="lang-name">English</div>
+      <div class="lang-person">International · Any country</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main app ── -->
+<div class="app" id="main-app" style="display:none;">
+
+  <header class="header">
+    <div class="brand">
+      <div class="diamond"><span>✦</span></div>
+      <div>
+        <div class="brand-name">KOSMOS PROSPECTOR</div>
+        <div class="brand-tag" id="hdr-tag">Lead Hunter</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="kpis">
+        <div class="kpi"><div class="kpi-n" id="kpi-total">0</div><div class="kpi-l" id="kpi-l1">Imported</div></div>
+        <div class="kpi"><div class="kpi-n" id="kpi-leads">0</div><div class="kpi-l" id="kpi-l2">No website</div></div>
+        <div class="kpi"><div class="kpi-n" id="kpi-sent">0</div><div class="kpi-l" id="kpi-l3">Sent</div></div>
+      </div>
+      <button class="lang-switch-btn" onclick="switchLang()" id="lang-switch-btn">🌐 ES</button>
+      <button class="settings-btn" onclick="openSettings()" title="Configuración / Settings">⚙</button>
+    </div>
+  </header>
+
+  <div class="steps">
+    <div class="step active" id="step-1" onclick="goStep(1)">
+      <div class="step-num">1</div>
+      <span class="step-label" id="s1-label">Get data</span>
+    </div>
+    <div class="step" id="step-2" onclick="goStep(2)">
+      <div class="step-num">2</div>
+      <span class="step-label" id="s2-label">Import CSV</span>
+    </div>
+    <div class="step" id="step-3" onclick="goStep(3)">
+      <div class="step-num">3</div>
+      <span class="step-label" id="s3-label">Leads</span>
+    </div>
+    <div class="step" id="step-4" onclick="goStep(4)">
+      <div class="step-num">4</div>
+      <span class="step-label" id="s4-label">WhatsApp</span>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div id="panel-1">
+    <div class="inst-grid">
+      <div class="inst-card">
+        <div class="inst-n" id="i1-n">STEP 01 —</div>
+        <div class="inst-t" id="i1-t">Create free account</div>
+        <div class="inst-d" id="i1-d">Sign up at Outscraper. Free tier: <strong style="color:var(--gold)">500 businesses/month</strong>, no credit card needed.<br><br>
+        <a class="inst-link" href="https://outscraper.com" target="_blank">→ outscraper.com</a></div>
+      </div>
+      <div class="inst-card">
+        <div class="inst-n" id="i2-n">STEP 02 —</div>
+        <div class="inst-t" id="i2-t">Search businesses</div>
+        <div class="inst-d" id="i2-d">In the dashboard choose <strong>Google Maps Scraper</strong>. Enter city + type. Limit: <strong style="color:var(--gold)">500</strong> for free tier.</div>
+      </div>
+      <div class="inst-card">
+        <div class="inst-n" id="i3-n">STEP 03 —</div>
+        <div class="inst-t" id="i3-t">Export CSV</div>
+        <div class="inst-d" id="i3-d">When scraping is done, export results as <strong>CSV</strong> and upload it in Step 2. The tool filters businesses with no website automatically. ✓</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head" id="q-head">Example search queries for Outscraper</div>
+      <div class="queries-box" id="queries-box">
+        <span class="q-label">Query:</span> restaurants New York USA<br>
+        <span class="q-label">Query:</span> hair salon London UK<br>
+        <span class="q-label">Query:</span> dentist Berlin Germany<br>
+        <span class="q-label">Limit:</span> 500 (free tier)<br>
+        <span class="q-label">Export:</span> CSV
+      </div>
+      <button class="btn btn-gold" style="margin-top:16px;" onclick="goStep(2)" id="btn-go2">I have the CSV → Next step</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div id="panel-2" style="display:none;">
+    <div class="panel">
+      <div class="panel-head" id="upload-head">Import CSV from Outscraper</div>
+      <div class="upload-zone" id="upload-zone"
+        ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
+        <input type="file" accept=".csv" onchange="loadCSV(this.files[0])">
+        <div class="upload-icon">⬆</div>
+        <div class="upload-title" id="upload-title">Drag CSV here or click</div>
+        <div class="upload-sub" id="upload-sub">
+          CSV exported from <a class="upload-link" href="https://outscraper.com" target="_blank">Outscraper</a><br>
+          Businesses without a website are filtered automatically.
+        </div>
+      </div>
+      <div id="csv-status"></div>
+    </div>
+    <div style="text-align:center;padding:6px 0;">
+      <span style="font-size:12px;color:var(--muted)" id="demo-text">Don't have a CSV yet? </span>
+      <button class="btn btn-ghost" style="font-size:10px;" onclick="loadDemo()" id="demo-btn">Load sample data →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div id="panel-3" style="display:none;">
+    <div class="filter-bar">
+      <div class="chip active" onclick="setFilter('all',this)" id="f-all">All</div>
+      <div class="chip" onclick="setFilter('pending',this)" id="f-pending">Pending</div>
+      <div class="chip" onclick="setFilter('sent',this)" id="f-sent">Sent</div>
+      <div class="chip" onclick="setFilter('weak',this)" id="f-weak">Con web</div>
+      <div class="fsearch"><input type="text" id="search-input" placeholder="Search..." oninput="searchLeads(this.value)"></div>
+    </div>
+    <div class="table-top" id="tbl-top-main">
+      <div class="table-title" id="tbl-title">Leads without website <span class="badge" id="leads-badge">0</span></div>
+      <div class="tactions">
+        <button class="btn btn-ghost" id="btn-export" onclick="exportCSV()" disabled>↓ Export</button>
+        <button class="btn btn-outline" id="btn-step4" onclick="goStep(4)" disabled>Send WhatsApp →</button>
+      </div>
+    </div>
+    <div class="table-wrap" id="main-table-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th>
+          <th id="th-name">Business</th>
+          <th id="th-cat">Category</th>
+          <th id="th-addr">Address</th>
+          <th id="th-phone">Phone</th>
+          <th id="th-status">Status</th>
+          <th id="th-action">Action</th>
+        </tr></thead>
+        <tbody id="leads-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Weak website section (shown when filter = 'weak') -->
+    <div id="weak-section" style="display:none;">
+      <div class="table-top">
+        <div class="table-title" id="weak-title">Con sitio web <span class="badge" id="weak-badge">0</span></div>
+        <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;" id="weak-hint">Analizá su web antes de agregarlos como prospecto</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>#</th>
+            <th id="wth-name">Negocio</th>
+            <th id="wth-cat">Rubro</th>
+            <th id="wth-site">Sitio web</th>
+            <th id="wth-score">Análisis SEO</th>
+            <th id="wth-action">Acción</th>
+          </tr></thead>
+          <tbody id="weak-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div id="panel-4" style="display:none;">
+    <div class="panel">
+      <div class="panel-head" id="tpl-head">WhatsApp message</div>
+      <div class="field">
+        <label id="tpl-label">Message template</label>
+        <textarea id="msg-tpl"></textarea>
+      </div>
+      <div style="margin-top:10px;">
+        <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase;" id="vars-label">Available variables — click to insert:</div>
+        <div class="tpl-vars">
+          <div class="tpl-var" onclick="insertVar('{nombre}')">&#123;nombre&#125;</div>
+          <div class="tpl-var" onclick="insertVar('{negocio}')">&#123;negocio&#125;</div>
+          <div class="tpl-var" onclick="insertVar('{ciudad}')">&#123;ciudad&#125;</div>
+          <div class="tpl-var" onclick="insertVar('{rubro}')">&#123;rubro&#125;</div>
+        </div>
+      </div>
+      <div class="bulk-foot">
+        <div class="bulk-info" id="bulk-info">—</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost" onclick="openPreview()" id="btn-preview">Preview</button>
+          <button class="btn btn-outline" onclick="openBulkConfirm()" id="btn-bulk">Send to all →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-top" style="margin-top:20px;">
+      <div class="table-title" id="pending-title">Pending <span class="badge" id="pending-badge">0</span></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th id="th2-name">Business</th><th id="th2-phone">Phone</th><th id="th2-status">Status</th><th id="th2-send">Send</th>
+        </tr></thead>
+        <tbody id="pending-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modals -->
+<div class="overlay" id="modal-bulk">
+  <div class="modal">
+    <h3 id="mbulk-title">Send to all</h3>
+    <div class="modal-body" id="mbulk-desc"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-bulk')" id="mbulk-cancel">Cancel</button>
+      <button class="btn btn-gold" onclick="runBulk()" id="mbulk-confirm">Confirm →</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-preview">
+  <div class="modal">
+    <h3 id="mprev-title">Message preview</h3>
+    <div class="modal-pre" id="preview-text"></div>
+    <div class="modal-foot">
+      <button class="btn btn-gold" onclick="closeModal('modal-preview')" id="mprev-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-settings">
+  <div class="modal" style="max-width:520px;">
+    <h3 id="mset-title">⚙ Configuración</h3>
+    <div class="modal-body" style="margin-bottom:0;">
+      <div style="font-size:12px;line-height:1.8;margin-bottom:18px;">
+        Para guardar prospectos en <strong style="color:var(--gold)">Notion</strong> automáticamente, conectá un webhook de <strong>Make.com</strong> (gratis, 1000 ops/mes).<br>
+        <span style="font-size:10px;color:var(--muted);">En Make: Crear escenario → Webhooks (trigger) → Notion "Create a database item"</span>
+      </div>
+      <div class="field">
+        <label id="mset-wh-label">Make.com Webhook URL</label>
+        <input type="url" id="webhook-url" placeholder="https://hook.eu1.make.com/..." style="font-family:'DM Mono',monospace;font-size:12px;">
+      </div>
+      <div id="webhook-status" style="font-family:'DM Mono',monospace;font-size:10px;padding:6px 10px;border:1px solid var(--border2);display:none;margin-top:-6px;margin-bottom:12px;"></div>
+      <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;line-height:2;padding:10px;background:var(--bg);border:1px solid var(--border2);">
+        <span style="color:var(--gold)">Soledad</span> → idioma ES → agente "Soledad" en Notion<br>
+        <span style="color:var(--gold)">Silvina</span> → idioma IT → agente "Silvina" en Notion<br>
+        <span style="color:var(--gold)">Link Soledad:</span> <span id="mset-link-es" style="color:var(--blue);">...</span><br>
+        <span style="color:var(--gold)">Link Silvina:</span> <span id="mset-link-it" style="color:var(--blue);">...</span>
+      </div>
+    </div>
+    <div class="modal-foot" style="margin-top:18px;">
+      <button class="btn btn-ghost" onclick="closeModal('modal-settings')" id="mset-cancel">Cancelar</button>
+      <button class="btn btn-gold" onclick="saveSettings()" id="mset-save">Guardar →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Translations ──────────────────────────────────────────────────
+const T = {
+  en: {
+    tag:'Lead Hunter · Free',
+    kpi1:'Imported', kpi2:'No website', kpi3:'Sent',
+    s1:'Get data', s2:'Import CSV', s3:'Leads', s4:'WhatsApp',
+    i1n:'STEP 01 —', i1t:'Create free account',
+    i1d:'Sign up at <a class="inst-link" href="https://outscraper.com" target="_blank">Outscraper</a>. Free tier: <strong style="color:var(--gold)">500 businesses/month</strong>, no credit card needed.',
+    i2n:'STEP 02 —', i2t:'Search businesses',
+    i2d:'In the dashboard choose <strong>Google Maps Scraper</strong>. Enter your city + business type. Limit 500 on free tier.',
+    i3n:'STEP 03 —', i3t:'Export CSV',
+    i3d:'When done, export as <strong>CSV</strong> and upload in Step 2. Businesses without a website are filtered automatically. ✓',
+    qhead:'Example search queries',
+    queries:`<span class="q-label">Query:</span> restaurants New York USA<br><span class="q-label">Query:</span> hair salon London UK<br><span class="q-label">Query:</span> dentist Chicago USA<br><span class="q-label">Limit:</span> 500 (free tier)<br><span class="q-label">Export:</span> CSV`,
+    btnGo2:'I have the CSV → Next',
+    uploadHead:'Import CSV from Outscraper',
+    uploadTitle:'Drag CSV here or click to select',
+    uploadSub:'CSV exported from <a class="upload-link" href="https://outscraper.com" target="_blank">Outscraper</a><br>Businesses without a website are filtered automatically.',
+    demoText:"Don't have a CSV yet? ",
+    demoBtn:'Load sample data →',
+    tblTitle:'Leads without website',
+    fAll:'All', fPending:'Pending', fSent:'Sent',
+    thName:'Business', thCat:'Category', thAddr:'Address', thPhone:'Phone', thStatus:'Status', thAction:'Action',
+    btnExport:'↓ Export', btnStep4:'Send WhatsApp →',
+    tplHead:'WhatsApp message template',
+    tplLabel:'Edit your message',
+    varsLabel:'Available variables — click to insert:',
+    bulkBtn:'Send to all →', previewBtn:'Preview',
+    pendingTitle:'Pending to send',
+    mbulkTitle:'Send to all',
+    mbulkCancel:'Cancel', mbulkConfirm:'Confirm →',
+    mprevTitle:'Message preview', mprevClose:'Close',
+    th2Name:'Business', th2Phone:'Phone', th2Status:'Status', th2Send:'Send',
+    tagSent:'Sent ✓', tagPending:'Pending',
+    waSent:'✓ Sent', waSend:'→ WA',
+    toastSent:'Message sent to',
+    toastLeads:'leads ready',
+    statusOk: (total, leads) => `✓ ${total} businesses imported · ${leads} without website found`,
+    statusErr:'The file appears empty or invalid.',
+    bulkDesc: (n) => `WhatsApp Web will open for ${n} leads without a website. Messages open one by one so you can review each. Continue?`,
+    bulkInfo: (n) => `${n} leads ready to receive message`,
+    emptyTable:'Import a CSV from Outscraper to see leads.',
+    emptyFilter:'No results with this filter.',
+    emptyPending:'All sent! Nothing pending.',
+    defaultMsg:`Hi {nombre}! 👋\n\nI noticed that *{negocio}* doesn't have a website yet. At *Kosmos Studio* we build professional websites for businesses like yours.\n\n✦ Custom design\n✦ Ready in 7–10 days\n✦ Affordable price\n\nWould you like a free proposal?\n\n— Kosmos Studio\nsomoskosmos.com`,
+    switchLabel:'🌐 EN',
+    noPhone:'no phone',
+    searchPlaceholder:'Search...',
+    csvStatus: {
+      empty: 'The file seems empty.',
+      ok: (t,l) => `✓ ${t} businesses imported · ${l} without website`
+    },
+    fWeak:'With website', weakTitle:'With website · check quality',
+    weakHint:'Analyze their site before adding as a lead',
+    wthName:'Business', wthCat:'Category', wthSite:'Website', wthScore:'SEO Analysis', wthAction:'Action',
+    btnAnalyze:'Analyze', btnAddLead:'+ Add as lead',
+    toastAdded:'added as lead',
+    settingsTitle:'⚙ Settings',
+    notionSynced:'✓ Saved in Notion',
+  },
+
+  es: {
+    tag:'Buscador de clientes · Gratis',
+    kpi1:'Importados', kpi2:'Sin web', kpi3:'Enviados',
+    s1:'Obtener datos', s2:'Importar CSV', s3:'Prospectos', s4:'WhatsApp',
+    i1n:'PASO 01 —', i1t:'Crear cuenta gratis',
+    i1d:'Registrate en <a class="inst-link" href="https://outscraper.com" target="_blank">Outscraper</a>. Tiene free tier de <strong style="color:var(--gold)">500 negocios/mes</strong> sin tarjeta de crédito.',
+    i2n:'PASO 02 —', i2t:'Buscar negocios',
+    i2d:'En el dashboard elegís <strong>Google Maps Scraper</strong>. Escribís ciudad + rubro. Límite 500 en el plan gratis.',
+    i3n:'PASO 03 —', i3t:'Exportar CSV',
+    i3d:'Cuando termina, exportás como <strong>CSV</strong> y lo subís en el Paso 2. La herramienta filtra solos los que no tienen web. ✓',
+    qhead:'Ejemplos de búsquedas en Outscraper',
+    queries:`<span class="q-label">Query:</span> restaurants Cordoba Argentina<br><span class="q-label">Query:</span> peluquerias Buenos Aires Argentina<br><span class="q-label">Query:</span> dentist Mendoza Argentina<br><span class="q-label">Limit:</span> 500 (plan gratis)<br><span class="q-label">Export:</span> CSV`,
+    btnGo2:'Ya tengo el CSV → Siguiente',
+    uploadHead:'Importar CSV de Outscraper',
+    uploadTitle:'Arrastrá el CSV acá o hacé clic',
+    uploadSub:'CSV exportado de <a class="upload-link" href="https://outscraper.com" target="_blank">Outscraper</a><br>Los negocios sin sitio web se filtran automáticamente.',
+    demoText:'¿Todavía no tenés CSV? ',
+    demoBtn:'Cargar datos de prueba →',
+    tblTitle:'Prospectos sin sitio web',
+    fAll:'Todos', fPending:'Pendientes', fSent:'Enviados',
+    thName:'Negocio', thCat:'Rubro', thAddr:'Dirección', thPhone:'Teléfono', thStatus:'Estado', thAction:'Acción',
+    btnExport:'↓ Exportar', btnStep4:'Enviar WhatsApp →',
+    tplHead:'Mensaje de WhatsApp',
+    tplLabel:'Editá tu mensaje',
+    varsLabel:'Variables disponibles — hacé clic para insertar:',
+    bulkBtn:'Enviar a todos →', previewBtn:'Vista previa',
+    pendingTitle:'Pendientes de envío',
+    mbulkTitle:'Envío masivo',
+    mbulkCancel:'Cancelar', mbulkConfirm:'Confirmar →',
+    mprevTitle:'Vista previa del mensaje', mprevClose:'Cerrar',
+    th2Name:'Negocio', th2Phone:'Teléfono', th2Status:'Estado', th2Send:'Enviar',
+    tagSent:'Enviado ✓', tagPending:'Pendiente',
+    waSent:'✓ Enviado', waSend:'→ WA',
+    toastSent:'Mensaje enviado a',
+    toastLeads:'prospectos listos',
+    statusOk: (total, leads) => `✓ ${total} negocios importados · ${leads} sin sitio web encontrados`,
+    statusErr:'El archivo parece vacío o inválido.',
+    bulkDesc: (n) => `Se abrirá WhatsApp Web para ${n} prospectos sin sitio web. Los mensajes se abren de a uno para que puedas revisar cada uno. ¿Continuás?`,
+    bulkInfo: (n) => `${n} prospectos listos para recibir mensaje`,
+    emptyTable:'Importá un CSV de Outscraper para ver los prospectos.',
+    emptyFilter:'No hay resultados con este filtro.',
+    emptyPending:'¡Todo enviado! No quedan pendientes.',
+    defaultMsg:`¡Hola {nombre}! 👋\n\nVi que *{negocio}* no tiene sitio web todavía, y quería contarte que en *Kosmos Studio* creamos sitios profesionales para negocios como el tuyo.\n\n✦ Diseño a medida\n✦ Listo en 7-10 días\n✦ Precio accesible\n\n¿Querés que te mandemos una propuesta sin compromiso?\n\n— Kosmos Studio\nsomoskosmos.com`,
+    switchLabel:'🌐 ES',
+    noPhone:'sin tel',
+    searchPlaceholder:'Buscar...',
+    fWeak:'Con web', weakTitle:'Con sitio web · revisar calidad',
+    weakHint:'Analizá su web antes de agregar como prospecto',
+    wthName:'Negocio', wthCat:'Rubro', wthSite:'Sitio web', wthScore:'Análisis SEO', wthAction:'Acción',
+    btnAnalyze:'Analizar', btnAddLead:'+ Agregar',
+    toastAdded:'agregado como prospecto',
+    settingsTitle:'⚙ Configuración',
+    notionSynced:'✓ Guardado en Notion',
+  },
+
+  it: {
+    tag:'Cacciatore di clienti · Gratuito',
+    kpi1:'Importati', kpi2:'Senza sito', kpi3:'Inviati',
+    s1:'Ottieni dati', s2:'Importa CSV', s3:'Lead', s4:'WhatsApp',
+    i1n:'PASSO 01 —', i1t:'Crea account gratuito',
+    i1d:'Registrati su <a class="inst-link" href="https://outscraper.com" target="_blank">Outscraper</a>. Piano gratuito: <strong style="color:var(--gold)">500 attività/mese</strong> senza carta di credito.',
+    i2n:'PASSO 02 —', i2t:'Cerca attività',
+    i2d:'Nel dashboard scegli <strong>Google Maps Scraper</strong>. Inserisci città + tipo di attività. Limite 500 nel piano gratuito.',
+    i3n:'PASSO 03 —', i3t:'Esporta CSV',
+    i3d:'Quando finisce, esporti come <strong>CSV</strong> e lo carichi al Passo 2. La piattaforma filtra automaticamente le attività senza sito web. ✓',
+    qhead:'Esempi di ricerche su Outscraper',
+    queries:`<span class="q-label">Query:</span> ristoranti Milano Italia<br><span class="q-label">Query:</span> parrucchieri Roma Italia<br><span class="q-label">Query:</span> dentista Napoli Italia<br><span class="q-label">Limit:</span> 500 (piano gratuito)<br><span class="q-label">Export:</span> CSV`,
+    btnGo2:'Ho il CSV → Avanti',
+    uploadHead:'Importa CSV da Outscraper',
+    uploadTitle:'Trascina il CSV qui o clicca',
+    uploadSub:'CSV esportato da <a class="upload-link" href="https://outscraper.com" target="_blank">Outscraper</a><br>Le attività senza sito web vengono filtrate automaticamente.',
+    demoText:'Non hai ancora il CSV? ',
+    demoBtn:'Carica dati di esempio →',
+    tblTitle:'Lead senza sito web',
+    fAll:'Tutti', fPending:'In attesa', fSent:'Inviati',
+    thName:'Attività', thCat:'Categoria', thAddr:'Indirizzo', thPhone:'Telefono', thStatus:'Stato', thAction:'Azione',
+    btnExport:'↓ Esporta', btnStep4:'Invia WhatsApp →',
+    tplHead:'Messaggio WhatsApp',
+    tplLabel:'Modifica il tuo messaggio',
+    varsLabel:'Variabili disponibili — clicca per inserire:',
+    bulkBtn:'Invia a tutti →', previewBtn:'Anteprima',
+    pendingTitle:'In attesa di invio',
+    mbulkTitle:'Invio massivo',
+    mbulkCancel:'Annulla', mbulkConfirm:'Conferma →',
+    mprevTitle:'Anteprima messaggio', mprevClose:'Chiudi',
+    th2Name:'Attività', th2Phone:'Telefono', th2Status:'Stato', th2Send:'Invia',
+    tagSent:'Inviato ✓', tagPending:'In attesa',
+    waSent:'✓ Inviato', waSend:'→ WA',
+    toastSent:'Messaggio inviato a',
+    toastLeads:'lead pronti',
+    statusOk: (total, leads) => `✓ ${total} attività importate · ${leads} senza sito web trovate`,
+    statusErr:"Il file sembra vuoto o non valido.",
+    bulkDesc: (n) => `WhatsApp Web si aprirà per ${n} attività senza sito web. I messaggi si apriranno uno alla volta. Continui?`,
+    bulkInfo: (n) => `${n} lead pronti a ricevere il messaggio`,
+    emptyTable:'Importa un CSV da Outscraper per vedere i lead.',
+    emptyFilter:'Nessun risultato con questo filtro.',
+    emptyPending:'Tutto inviato! Nessuno in attesa.',
+    defaultMsg:`Ciao {nombre}! 👋\n\nHo notato che *{negocio}* non ha ancora un sito web e volevo farti sapere che da *Kosmos Studio* creiamo siti professionali per attività come la tua.\n\n✦ Design su misura\n✦ Pronto in 7-10 giorni\n✦ Prezzo accessibile\n\nVorresti ricevere un preventivo gratuito?\n\n— Kosmos Studio\nsomoskosmos.com`,
+    switchLabel:'🌐 IT',
+    noPhone:'nessun tel',
+    searchPlaceholder:'Cerca...',
+    fWeak:'Con sito', weakTitle:'Con sito web · verifica qualità',
+    weakHint:'Analizza il sito prima di aggiungere come lead',
+    wthName:'Attività', wthCat:'Categoria', wthSite:'Sito web', wthScore:'Analisi SEO', wthAction:'Azione',
+    btnAnalyze:'Analizza', btnAddLead:'+ Aggiungi',
+    toastAdded:'aggiunto come lead',
+    settingsTitle:'⚙ Impostazioni',
+    notionSynced:'✓ Salvato in Notion',
+  },
+
+  de: {
+    tag:'Kundensuche · Kostenlos',
+    kpi1:'Importiert', kpi2:'Ohne Website', kpi3:'Gesendet',
+    s1:'Daten holen', s2:'CSV importieren', s3:'Leads', s4:'WhatsApp',
+    i1n:'SCHRITT 01 —', i1t:'Kostenloses Konto erstellen',
+    i1d:'Registriere dich bei <a class="inst-link" href="https://outscraper.com" target="_blank">Outscraper</a>. Kostenloses Kontingent: <strong style="color:var(--gold)">500 Unternehmen/Monat</strong>, keine Kreditkarte nötig.',
+    i2n:'SCHRITT 02 —', i2t:'Unternehmen suchen',
+    i2d:'Im Dashboard wähle <strong>Google Maps Scraper</strong>. Stadt + Branche eingeben. Limit: 500 im kostenlosen Plan.',
+    i3n:'SCHRITT 03 —', i3t:'CSV exportieren',
+    i3d:'Nach dem Scraping als <strong>CSV</strong> exportieren und in Schritt 2 hochladen. Unternehmen ohne Website werden automatisch gefiltert. ✓',
+    qhead:'Beispiel-Suchanfragen für Outscraper',
+    queries:`<span class="q-label">Query:</span> restaurants Berlin Deutschland<br><span class="q-label">Query:</span> friseur Hamburg Deutschland<br><span class="q-label">Query:</span> zahnarzt Zürich Schweiz<br><span class="q-label">Limit:</span> 500 (kostenloser Plan)<br><span class="q-label">Export:</span> CSV`,
+    btnGo2:'Ich habe die CSV → Weiter',
+    uploadHead:'CSV von Outscraper importieren',
+    uploadTitle:'CSV hierher ziehen oder klicken',
+    uploadSub:'CSV exportiert von <a class="upload-link" href="https://outscraper.com" target="_blank">Outscraper</a><br>Unternehmen ohne Website werden automatisch gefiltert.',
+    demoText:'Noch keine CSV? ',
+    demoBtn:'Beispieldaten laden →',
+    tblTitle:'Leads ohne Website',
+    fAll:'Alle', fPending:'Ausstehend', fSent:'Gesendet',
+    thName:'Unternehmen', thCat:'Branche', thAddr:'Adresse', thPhone:'Telefon', thStatus:'Status', thAction:'Aktion',
+    btnExport:'↓ Exportieren', btnStep4:'WhatsApp senden →',
+    tplHead:'WhatsApp Nachricht',
+    tplLabel:'Nachricht bearbeiten',
+    varsLabel:'Verfügbare Variablen — zum Einfügen klicken:',
+    bulkBtn:'An alle senden →', previewBtn:'Vorschau',
+    pendingTitle:'Ausstehende Sendungen',
+    mbulkTitle:'Massenversand',
+    mbulkCancel:'Abbrechen', mbulkConfirm:'Bestätigen →',
+    mprevTitle:'Nachrichtenvorschau', mprevClose:'Schließen',
+    th2Name:'Unternehmen', th2Phone:'Telefon', th2Status:'Status', th2Send:'Senden',
+    tagSent:'Gesendet ✓', tagPending:'Ausstehend',
+    waSent:'✓ Gesendet', waSend:'→ WA',
+    toastSent:'Nachricht gesendet an',
+    toastLeads:'Leads bereit',
+    statusOk: (total, leads) => `✓ ${total} Unternehmen importiert · ${leads} ohne Website gefunden`,
+    statusErr:'Die Datei scheint leer oder ungültig zu sein.',
+    bulkDesc: (n) => `WhatsApp Web öffnet sich für ${n} Unternehmen ohne Website. Nachrichten öffnen sich einzeln zur Überprüfung. Weiter?`,
+    bulkInfo: (n) => `${n} Leads bereit für Nachricht`,
+    emptyTable:'Importiere eine CSV von Outscraper um Leads zu sehen.',
+    emptyFilter:'Keine Ergebnisse mit diesem Filter.',
+    emptyPending:'Alles gesendet! Nichts mehr ausstehend.',
+    defaultMsg:`Hallo {nombre}! 👋\n\nMir ist aufgefallen, dass *{negocio}* noch keine Website hat. Bei *Kosmos Studio* erstellen wir professionelle Websites für Unternehmen wie Ihres.\n\n✦ Individuelles Design\n✦ Fertig in 7–10 Tagen\n✦ Faire Preise\n\nMöchten Sie ein kostenloses Angebot erhalten?\n\n— Kosmos Studio\nsomoskosmos.com`,
+    switchLabel:'🌐 DE',
+    noPhone:'kein Tel.',
+    searchPlaceholder:'Suchen...',
+    fWeak:'Mit Website', weakTitle:'Mit Website · Qualität prüfen',
+    weakHint:'Analysiere die Website bevor du als Lead hinzufügst',
+    wthName:'Unternehmen', wthCat:'Branche', wthSite:'Website', wthScore:'SEO-Analyse', wthAction:'Aktion',
+    btnAnalyze:'Analysieren', btnAddLead:'+ Hinzufügen',
+    toastAdded:'als Lead hinzugefügt',
+    settingsTitle:'⚙ Einstellungen',
+    notionSynced:'✓ In Notion gespeichert',
+  },
+
+  sk: {
+    tag:'Hľadanie klientov · Zadarmo',
+    kpi1:'Importované', kpi2:'Bez webu', kpi3:'Odoslané',
+    s1:'Získať dáta', s2:'Importovať CSV', s3:'Leady', s4:'WhatsApp',
+    i1n:'KROK 01 —', i1t:'Vytvoriť bezplatný účet',
+    i1d:'Zaregistruj sa na <a class="inst-link" href="https://outscraper.com" target="_blank">Outscraper</a>. Bezplatný plán: <strong style="color:var(--gold)">500 firiem/mesiac</strong> bez kreditnej karty.',
+    i2n:'KROK 02 —', i2t:'Hľadať firmy',
+    i2d:'Na dashboarde vyber <strong>Google Maps Scraper</strong>. Zadaj mesto + typ firmy. Limit: 500 v bezplatnom pláne.',
+    i3n:'KROK 03 —', i3t:'Exportovať CSV',
+    i3d:'Po dokončení exportuj ako <strong>CSV</strong> a nahraj v Kroku 2. Firmy bez webstránky sa filtrujú automaticky. ✓',
+    qhead:'Príklady vyhľadávaní na Outscraper',
+    queries:`<span class="q-label">Query:</span> restaurants Bratislava Slovakia<br><span class="q-label">Query:</span> kadernictvo Košice Slovakia<br><span class="q-label">Query:</span> zubar Zilina Slovakia<br><span class="q-label">Limit:</span> 500 (bezplatný plán)<br><span class="q-label">Export:</span> CSV`,
+    btnGo2:'Mám CSV → Ďalej',
+    uploadHead:'Importovať CSV z Outscraper',
+    uploadTitle:'Pretiahni CSV sem alebo klikni',
+    uploadSub:'CSV exportované z <a class="upload-link" href="https://outscraper.com" target="_blank">Outscraper</a><br>Firmy bez webstránky sa filtrujú automaticky.',
+    demoText:'Ešte nemáš CSV? ',
+    demoBtn:'Načítať ukážkové dáta →',
+    tblTitle:'Leady bez webstránky',
+    fAll:'Všetky', fPending:'Čakajúce', fSent:'Odoslané',
+    thName:'Firma', thCat:'Kategória', thAddr:'Adresa', thPhone:'Telefón', thStatus:'Stav', thAction:'Akcia',
+    btnExport:'↓ Exportovať', btnStep4:'Poslať WhatsApp →',
+    tplHead:'WhatsApp správa',
+    tplLabel:'Uprav svoju správu',
+    varsLabel:'Dostupné premenné — klikni pre vloženie:',
+    bulkBtn:'Poslať všetkým →', previewBtn:'Náhľad',
+    pendingTitle:'Čakajúce na odoslanie',
+    mbulkTitle:'Hromadné odoslanie',
+    mbulkCancel:'Zrušiť', mbulkConfirm:'Potvrdiť →',
+    mprevTitle:'Náhľad správy', mprevClose:'Zavrieť',
+    th2Name:'Firma', th2Phone:'Telefón', th2Status:'Stav', th2Send:'Poslať',
+    tagSent:'Odoslané ✓', tagPending:'Čakajúce',
+    waSent:'✓ Odoslané', waSend:'→ WA',
+    toastSent:'Správa odoslaná pre',
+    toastLeads:'leadov pripravených',
+    statusOk: (total, leads) => `✓ ${total} firiem importovaných · ${leads} bez webstránky nájdených`,
+    statusErr:'Súbor sa zdá byť prázdny alebo neplatný.',
+    bulkDesc: (n) => `WhatsApp Web sa otvorí pre ${n} firiem bez webstránky. Správy sa otvárajú po jednej na kontrolu. Pokračovať?`,
+    bulkInfo: (n) => `${n} leadov pripravených na správu`,
+    emptyTable:'Importuj CSV z Outscraper pre zobrazenie leadov.',
+    emptyFilter:'Žiadne výsledky s týmto filtrom.',
+    emptyPending:'Všetko odoslané! Nič čakajúce.',
+    defaultMsg:`Ahoj {nombre}! 👋\n\nVšimla som si, že *{negocio}* ešte nemá webstránku. V *Kosmos Studio* vytvárame profesionálne weby pre firmy ako je tá vaša.\n\n✦ Dizajn na mieru\n✦ Hotové za 7–10 dní\n✦ Dostupná cena\n\nChceli by ste bezplatnú ponuku?\n\n— Kosmos Studio\nsomoskosmos.com`,
+    switchLabel:'🌐 SK',
+    noPhone:'bez tel.',
+    searchPlaceholder:'Hľadať...',
+  }
+};
+
+// ── App state ─────────────────────────────────────────────────────
+let lang = 'en';
+let allLeads = [], leads = [], weakLeads = [], filterMode = 'all', searchQuery = '';
+
+// ── Lang selection ────────────────────────────────────────────────
+function selectLang(l) {
+  lang = l;
+  document.getElementById('lang-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  applyLang();
+  goStep(1);
+}
+
+function switchLang() {
+  document.getElementById('lang-screen').style.display = 'flex';
+  document.getElementById('main-app').style.display = 'none';
+}
+
+function applyLang() {
+  const t = T[lang];
+  const s = (id, val) => { const el = document.getElementById(id); if(el) el.innerHTML = val; };
+  s('hdr-tag', t.tag);
+  s('kpi-l1', t.kpi1); s('kpi-l2', t.kpi2); s('kpi-l3', t.kpi3);
+  s('s1-label', t.s1); s('s2-label', t.s2); s('s3-label', t.s3); s('s4-label', t.s4);
+  s('i1-n', t.i1n); s('i1-t', t.i1t); s('i1-d', t.i1d);
+  s('i2-n', t.i2n); s('i2-t', t.i2t); s('i2-d', t.i2d);
+  s('i3-n', t.i3n); s('i3-t', t.i3t); s('i3-d', t.i3d);
+  s('q-head', t.qhead);
+  document.getElementById('queries-box').innerHTML = t.queries;
+  s('btn-go2', t.btnGo2);
+  s('upload-head', t.uploadHead); s('upload-title', t.uploadTitle); s('upload-sub', t.uploadSub);
+  s('demo-text', t.demoText); s('demo-btn', t.demoBtn);
+  s('tbl-title', `${t.tblTitle} <span class="badge" id="leads-badge">${leads.length}</span>`);
+  s('f-all', t.fAll); s('f-pending', t.fPending); s('f-sent', t.fSent); s('f-weak', t.fWeak||'Con web');
+  s('th-name', t.thName); s('th-cat', t.thCat); s('th-addr', t.thAddr);
+  s('th-phone', t.thPhone); s('th-status', t.thStatus); s('th-action', t.thAction);
+  s('btn-export', t.btnExport); s('btn-step4', t.btnStep4);
+  s('weak-title', `${t.weakTitle||'Con web'} <span class="badge" id="weak-badge">${weakLeads.length}</span>`);
+  s('weak-hint', t.weakHint||'');
+  s('wth-name', t.wthName||''); s('wth-cat', t.wthCat||''); s('wth-site', t.wthSite||'');
+  s('wth-score', t.wthScore||''); s('wth-action', t.wthAction||'');
+  s('mset-title', t.settingsTitle||'⚙ Settings');
+  s('tpl-head', t.tplHead); s('tpl-label', t.tplLabel); s('vars-label', t.varsLabel);
+  s('btn-bulk', t.bulkBtn); s('btn-preview', t.previewBtn);
+  s('pending-title', `${t.pendingTitle} <span class="badge" id="pending-badge">0</span>`);
+  s('mbulk-title', t.mbulkTitle); s('mbulk-cancel', t.mbulkCancel); s('mbulk-confirm', t.mbulkConfirm);
+  s('mprev-title', t.mprevTitle); s('mprev-close', t.mprevClose);
+  s('th2-name', t.th2Name); s('th2-phone', t.th2Phone); s('th2-status', t.th2Status); s('th2-send', t.th2Send);
+  s('lang-switch-btn', t.switchLabel);
+  document.getElementById('msg-tpl').value = t.defaultMsg;
+  const si = document.getElementById('search-input');
+  if (si) si.placeholder = t.searchPlaceholder;
+  updateBulkInfo();
+  renderTable();
+  renderPending();
+}
+
+// ── Steps ─────────────────────────────────────────────────────────
+function goStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById(`panel-${i}`).style.display = i === n ? 'block' : 'none';
+    const s = document.getElementById(`step-${i}`);
+    s.className = 'step' + (i === n ? ' active' : i < n ? ' done' : '');
+  }
+  if (n === 3) renderTable();
+  if (n === 4) renderPending();
+}
+
+// ── CSV ───────────────────────────────────────────────────────────
+function dragOver(e) { e.preventDefault(); document.getElementById('upload-zone').classList.add('drag'); }
+function dragLeave() { document.getElementById('upload-zone').classList.remove('drag'); }
+function dropFile(e) { e.preventDefault(); dragLeave(); const f = e.dataTransfer.files[0]; if(f) loadCSV(f); }
+
+function loadCSV(file) {
+  const r = new FileReader();
+  r.onload = e => parseCSV(e.target.result);
+  r.readAsText(file);
+}
+
+function parseCSV(text) {
+  const t = T[lang];
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) { showCSVStatus(t.statusErr, true); return; }
+  const sep = lines[0].includes('\t') ? '\t' : ',';
+  const headers = parseLine(lines[0], sep).map(h => h.trim().toLowerCase().replace(/[\s"]/g,''));
+  const gi = (...ns) => { for(const n of ns){ const i = headers.findIndex(h=>h.includes(n)); if(i>=0) return i; } return -1; };
+  const iN=gi('name','nombre','business','attivit'), iPhone=gi('phone','telefono','tel','whatsapp','telefon'),
+        iS=gi('site','website','web','url'), iC=gi('category','categor','type','rubro','categoria','kategori','branche'),
+        iA=gi('address','direccion','addr','indirizzo','adresse'), iR=gi('rating');
+
+  allLeads = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseLine(lines[i], sep);
+    const name = cl(cols[iN]), phone = cl(cols[iPhone]), site = iS>=0 ? cl(cols[iS]) : '';
+    if (!name) continue;
+    allLeads.push({ id:i, name, phone, site, category: iC>=0?cl(cols[iC]):'—', address: iA>=0?cl(cols[iA]):'—', rating: iR>=0?cl(cols[iR]):'—', hasWebsite: site.length>3, status:'pending' });
+  }
+  leads = allLeads.filter(l => !l.hasWebsite && l.phone);
+  weakLeads = allLeads.filter(l => l.hasWebsite && l.phone);
+  updateStats();
+  showCSVStatus(t.statusOk(allLeads.length, leads.length));
+  document.getElementById('btn-export').disabled = leads.length === 0;
+  document.getElementById('btn-step4').disabled = leads.length === 0;
+  toast(`${leads.length} ${t.toastLeads}`);
+  goStep(3);
+}
+
+function parseLine(line, sep) {
+  const res=[]; let cur='', inQ=false;
+  for(const c of line){ if(c==='"'){inQ=!inQ;} else if(c===sep&&!inQ){res.push(cur);cur='';} else cur+=c; }
+  res.push(cur); return res;
+}
+function cl(v){ return v ? String(v).replace(/^"|"$/g,'').trim() : ''; }
+
+function showCSVStatus(msg, err) {
+  const el = document.getElementById('csv-status');
+  el.style.display = 'block';
+  el.style.color = err ? 'var(--red)' : 'var(--green)';
+  el.style.marginTop = '12px';
+  el.style.fontFamily = "'DM Mono',monospace";
+  el.style.fontSize = '12px';
+  el.textContent = msg;
+}
+
+function loadDemo() {
+  const demo = `name,phone,site,category,address,rating
+Peluquería El Estilo,+5493511234567,,hair_care,"San Martín 342, Córdoba",4.5
+Restaurante La Esquina,+5493519876543,,restaurant,"Colón 1200, Córdoba",4.2
+Consultorio Dr. López,+5493516543210,,dentist,"Vélez Sársfield 789",4.8
+Gimnasio FitZone,+5493512223344,,gym,"Av. Colón 500",4.1
+Studio Tattoo Ink,+5493517778899,,tattoo,"Obispo Trejo 210",4.9
+Ferretería Don Carlos,+5493513334455,http://doncarlos.com,hardware,"Bv. San Juan 900",4.0
+Panadería La Tradición,+5493511112233,,bakery,"Av. Yrigoyen 678",4.6
+Centro Estética Glow,+5493515556677,,beauty,"Rivadavia 450",4.3
+Veterinaria PetCare,+5493518889900,,veterinary,"Av. Vélez 1500",4.7`;
+  parseCSV(demo);
+}
+
+// ── Filter / Search ───────────────────────────────────────────────
+function setFilter(mode, el) {
+  filterMode = mode;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const weakSec = document.getElementById('weak-section');
+  const mainWrap = document.getElementById('main-table-wrap');
+  const mainTop = document.getElementById('tbl-top-main');
+  if (mode === 'weak') {
+    if (weakSec) weakSec.style.display = 'block';
+    if (mainWrap) mainWrap.style.display = 'none';
+    if (mainTop) mainTop.style.display = 'none';
+    renderWeak();
+  } else {
+    if (weakSec) weakSec.style.display = 'none';
+    if (mainWrap) mainWrap.style.display = '';
+    if (mainTop) mainTop.style.display = '';
+    renderTable();
+  }
+}
+function searchLeads(q) { searchQuery = q.toLowerCase(); renderTable(); }
+function getVisible() {
+  let l = leads;
+  if (filterMode==='pending') l = l.filter(x=>x.status==='pending');
+  if (filterMode==='sent') l = l.filter(x=>x.status==='sent');
+  if (searchQuery) l = l.filter(x=>x.name.toLowerCase().includes(searchQuery)||x.category.toLowerCase().includes(searchQuery));
+  return l;
+}
+
+// ── Render ────────────────────────────────────────────────────────
+function renderTable() {
+  const t = T[lang], tbody = document.getElementById('leads-tbody');
+  const list = getVisible();
+  const badge = document.getElementById('leads-badge');
+  if (badge) badge.textContent = leads.length;
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="empty-icon">◈</div><div class="empty-text">${leads.length===0?t.emptyTable:t.emptyFilter}</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map((l,i) => `
+    <tr>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">${String(i+1).padStart(2,'0')}</td>
+      <td class="td-name">${l.name}</td>
+      <td class="td-cat">${l.category}</td>
+      <td class="td-addr">${l.address}</td>
+      <td class="td-phone">${l.phone||`<span style="color:var(--muted);font-size:11px;">${t.noPhone}</span>`}</td>
+      <td>${l.status==='sent'?`<span class="tag tag-sent">${t.tagSent}</span>`:`<span class="tag tag-pending">${t.tagPending}</span>`}</td>
+      <td>${l.phone?`<button class="wa-btn ${l.status==='sent'?'sent':''}" onclick="sendOne(${allLeads.indexOf(l)})" ${l.status==='sent'?'disabled':''}>${l.status==='sent'?t.waSent:t.waSend}</button>`:`<span style="font-size:10px;color:var(--muted);">—</span>`}</td>
+    </tr>`).join('');
+}
+
+function renderPending() {
+  const t = T[lang], tbody = document.getElementById('pending-tbody');
+  const pending = leads.filter(l=>l.status==='pending'&&l.phone);
+  const pb = document.getElementById('pending-badge'); if(pb) pb.textContent = pending.length;
+  updateBulkInfo();
+  if (!pending.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty" style="padding:28px;"><div class="empty-text">${leads.length===0?t.emptyTable:t.emptyPending}</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = pending.map((l,i) => `
+    <tr>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">${String(i+1).padStart(2,'0')}</td>
+      <td style="font-weight:600;">${l.name}</td>
+      <td class="td-phone">${l.phone}</td>
+      <td><span class="tag tag-pending">${t.tagPending}</span></td>
+      <td><button class="wa-btn" onclick="sendOne(${allLeads.indexOf(l)})">${t.waSend}</button></td>
+    </tr>`).join('');
+}
+
+// ── WhatsApp ──────────────────────────────────────────────────────
+function buildMsg(lead) {
+  return document.getElementById('msg-tpl').value
+    .replace(/{nombre}/g, lead.name.split(' ')[0])
+    .replace(/{nome}/g, lead.name.split(' ')[0])
+    .replace(/{negocio}/g, lead.name)
+    .replace(/{ciudad}/g, lead.address.split(',').pop()?.trim()||'')
+    .replace(/{rubro}/g, lead.category)
+    .replace(/{rating}/g, lead.rating);
+}
+
+function sendOne(idx) {
+  const l = allLeads[idx]; if(!l||!l.phone) return;
+  const phone = l.phone.replace(/[\s\-()]/g,'').replace(/^\+/,'').replace(/^0+/,'');
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(buildMsg(l))}`, '_blank');
+  allLeads[idx].status = 'sent';
+  fireWebhook(l, 'whatsapp_enviado');
+  updateStats(); renderTable(); renderPending();
+  toast(`${T[lang].toastSent} ${l.name}`);
+}
+
+function openBulkConfirm() {
+  const t = T[lang];
+  const n = leads.filter(l=>l.status==='pending'&&l.phone).length;
+  if (!n) return;
+  document.getElementById('mbulk-desc').textContent = t.bulkDesc(n);
+  document.getElementById('modal-bulk').classList.add('open');
+}
+
+async function runBulk() {
+  closeModal('modal-bulk');
+  for (let i = 0; i < allLeads.length; i++) {
+    if (allLeads[i].status==='pending'&&allLeads[i].phone) { sendOne(i); await sleep(900); }
+  }
+}
+
+function openPreview() {
+  const s = leads.find(l=>l.status==='pending')||leads[0];
+  if (!s) return;
+  document.getElementById('preview-text').textContent = buildMsg(s);
+  document.getElementById('modal-preview').classList.add('open');
+}
+
+function insertVar(v) {
+  const ta = document.getElementById('msg-tpl');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  ta.value = ta.value.slice(0,s)+v+ta.value.slice(e);
+  ta.selectionStart = ta.selectionEnd = s+v.length;
+  ta.focus();
+}
+
+// ── Export ────────────────────────────────────────────────────────
+function exportCSV() {
+  const t = T[lang];
+  const rows = [['#',t.thName,t.thCat,t.thAddr,t.thPhone,'Rating',t.thStatus]];
+  leads.forEach((l,i) => rows.push([i+1,`"${l.name}"`,`"${l.category}"`,`"${l.address}"`,l.phone,l.rating,l.status==='sent'?t.tagSent:t.tagPending]));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'}));
+  a.download = `kosmos-leads-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('kpi-total').textContent = allLeads.length;
+  document.getElementById('kpi-leads').textContent = leads.length;
+  document.getElementById('kpi-sent').textContent = leads.filter(l=>l.status==='sent').length;
+}
+function updateBulkInfo() {
+  const t = T[lang], n = leads.filter(l=>l.status==='pending'&&l.phone).length;
+  const el = document.getElementById('bulk-info'); if(el) el.textContent = t.bulkInfo(n);
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+// Auto-detect lang from URL param e.g. ?lang=es
+const urlLang = new URLSearchParams(window.location.search).get('lang');
+if (urlLang && T[urlLang]) selectLang(urlLang);
+
+// ── Settings & Notion webhook ──────────────────────────────────────
+function openSettings() {
+  document.getElementById('webhook-url').value = localStorage.getItem('kp_webhook') || '';
+  const status = document.getElementById('webhook-status');
+  const saved = localStorage.getItem('kp_webhook');
+  if (saved) {
+    status.style.display = 'block';
+    status.style.color = 'var(--green)';
+    status.style.borderColor = 'var(--green)';
+    status.textContent = '✓ Webhook configurado: ' + saved.slice(0,40) + '...';
+  } else {
+    status.style.display = 'block';
+    status.style.color = 'var(--muted)';
+    status.style.borderColor = 'var(--border2)';
+    status.textContent = '· Sin webhook — los mensajes no se guardarán en Notion';
+  }
+  // Show direct links for each agent
+  const base = window.location.origin + window.location.pathname;
+  const esEl = document.getElementById('mset-link-es');
+  const itEl = document.getElementById('mset-link-it');
+  if (esEl) esEl.textContent = base + '?lang=es';
+  if (itEl) itEl.textContent = base + '?lang=it';
+  document.getElementById('modal-settings').classList.add('open');
+}
+
+function saveSettings() {
+  const url = document.getElementById('webhook-url').value.trim();
+  if (url) {
+    localStorage.setItem('kp_webhook', url);
+    toast('✓ Webhook guardado en Notion');
+  } else {
+    localStorage.removeItem('kp_webhook');
+    toast('Webhook eliminado');
+  }
+  closeModal('modal-settings');
+}
+
+async function fireWebhook(lead, action) {
+  const webhookUrl = localStorage.getItem('kp_webhook');
+  if (!webhookUrl) return;
+  const agente = lang === 'es' ? 'Soledad' : lang === 'it' ? 'Silvina' : 'Kosmos';
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre: lead.name,
+        telefono: lead.phone,
+        rubro: lead.category,
+        direccion: lead.address,
+        sitio_web: lead.site || '',
+        accion: action,
+        fecha: new Date().toLocaleString(),
+        agente: agente,
+        idioma: lang,
+        rating: lead.rating || ''
+      })
+    });
+    toast((T[lang].notionSynced || '✓ Notion') + ' · ' + lead.name);
+  } catch(e) { /* silent — no internet or wrong URL */ }
+}
+
+// ── Weak leads (businesses with website) ──────────────────────────
+function renderWeak() {
+  const t = T[lang];
+  const tbody = document.getElementById('weak-tbody');
+  if (!tbody) return;
+  const wb = document.getElementById('weak-badge');
+  if (wb) wb.textContent = weakLeads.length;
+  if (!weakLeads.length) {
+    const msg = leads.length === 0 && weakLeads.length === 0
+      ? (t.emptyTable || 'Import a CSV to see leads.')
+      : 'No hay negocios con sitio web en este CSV.';
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><div class="empty-icon">◈</div><div class="empty-text">${msg}</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = weakLeads.map((l, i) => {
+    const shortSite = (l.site||'').replace(/^https?:\/\//,'').replace(/\/$/,'').slice(0,35);
+    let scoreHtml = '';
+    if (l.perfScore !== undefined) {
+      const pc = l.perfScore >= 70 ? 'score-good' : l.perfScore >= 50 ? 'score-med' : 'score-bad';
+      const sc = l.seoScore >= 80 ? 'score-good' : l.seoScore >= 60 ? 'score-med' : 'score-bad';
+      scoreHtml = `<span class="score-pill ${pc}">Perf ${l.perfScore}</span><span class="score-pill ${sc}">SEO ${l.seoScore}</span>`;
+    } else {
+      scoreHtml = `<button class="wa-btn" onclick="checkSEO(${i})">${t.btnAnalyze||'Analizar'}</button>`;
+    }
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">${String(i+1).padStart(2,'0')}</td>
+      <td class="td-name">${l.name}</td>
+      <td class="td-cat">${l.category}</td>
+      <td><a href="${l.site}" target="_blank" style="color:var(--blue);font-family:'DM Mono',monospace;font-size:11px;">${shortSite}</a></td>
+      <td>${scoreHtml}</td>
+      <td>${l.phone ? `<button class="btn btn-outline" style="padding:5px 10px;font-size:9px;" onclick="addWeakAsLead(${i})">${t.btnAddLead||'+ Agregar'}</button>` : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function checkSEO(idx) {
+  const lead = weakLeads[idx];
+  if (!lead || !lead.site) return;
+  const tbody = document.getElementById('weak-tbody');
+  const btn = tbody ? tbody.querySelector(`tr:nth-child(${idx+1}) .wa-btn`) : null;
+  if (btn) { btn.textContent = '...'; btn.disabled = true; }
+  try {
+    const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(lead.site)}&strategy=mobile&category=performance&category=seo`;
+    const res = await fetch(apiUrl);
+    const data = await res.json();
+    lead.perfScore = Math.round(((data?.lighthouseResult?.categories?.performance?.score) || 0) * 100);
+    lead.seoScore = Math.round(((data?.lighthouseResult?.categories?.seo?.score) || 0) * 100);
+  } catch(e) {
+    lead.perfScore = 0; lead.seoScore = 0;
+  }
+  renderWeak();
+}
+
+function addWeakAsLead(idx) {
+  const lead = weakLeads[idx];
+  if (!lead) return;
+  lead.hasWebsite = false;
+  leads.push(lead);
+  weakLeads.splice(idx, 1);
+  updateStats();
+  renderWeak();
+  renderTable();
+  document.getElementById('btn-export').disabled = false;
+  document.getElementById('btn-step4').disabled = false;
+  toast(`${lead.name} — ${T[lang].toastAdded || 'agregado como prospecto'}`);
+}
+</script>
+</body>
+</html>
