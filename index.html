@@ -186,6 +186,40 @@
     .steps .step span.step-label{display:none;}
     .kpis{gap:12px;}
   }
+
+  /* ── Admin mode: steps + gear ocultos para usuarios normales ── */
+  .steps{display:none;}
+  body.admin .steps{display:flex;}
+  .settings-btn{display:none;}
+  body.admin .settings-btn{display:grid;}
+  #step-4{display:none;}
+  body.admin #step-4{display:flex;}
+  #btn-export{display:none;}
+  body.admin #btn-export{display:inline-flex;}
+  #btn-step4{display:none;}
+  body.admin #btn-step4{display:inline-flex;}
+
+  /* ── Notion status dot ── */
+  .notion-dot{width:7px;height:7px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0;transition:background 0.3s;}
+  .notion-dot.connected{background:var(--green);box-shadow:0 0 6px rgba(74,222,128,0.45);}
+  .notion-status{display:flex;align-items:center;gap:6px;font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:0.08em;cursor:default;}
+
+  /* ── Botón WhatsApp grande y verde ── */
+  .wa-send{background:#25D366;color:#fff;border:none;padding:9px 18px;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;letter-spacing:0.06em;transition:background 0.15s;white-space:nowrap;}
+  .wa-send:hover{background:#1db954;}
+  .wa-send.sent{background:transparent;color:var(--green);border:1px solid var(--green);cursor:default;padding:8px 17px;}
+  .wa-send:disabled{cursor:default;}
+
+  /* ── Sección de mensaje (colapsable, debajo de la tabla) ── */
+  .msg-section{border-top:1px solid var(--border);margin-top:24px;padding-top:18px;}
+  .msg-toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:0;}
+  .msg-toggle-btn{background:none;border:none;color:var(--muted);font-size:10px;font-family:'DM Mono',monospace;cursor:pointer;padding:0;letter-spacing:0.06em;}
+  .msg-toggle-btn:hover{color:var(--gold);}
+  .msg-body{margin-top:14px;}
+
+  /* ── Botón "enviar a todos" en la tabla ── */
+  .send-all-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-bottom:none;}
+  .send-all-info{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
 </style>
 </head>
 <body>
@@ -245,6 +279,10 @@
         <div class="kpi"><div class="kpi-n" id="kpi-total">0</div><div class="kpi-l" id="kpi-l1">Imported</div></div>
         <div class="kpi"><div class="kpi-n" id="kpi-leads">0</div><div class="kpi-l" id="kpi-l2">No website</div></div>
         <div class="kpi"><div class="kpi-n" id="kpi-sent">0</div><div class="kpi-l" id="kpi-l3">Sent</div></div>
+      </div>
+      <div class="notion-status" id="notion-status" title="Notion CRM">
+        <span class="notion-dot" id="notion-dot"></span>
+        <span id="notion-label">Notion</span>
       </div>
       <button class="lang-switch-btn" onclick="switchLang()" id="lang-switch-btn">🌐 ES</button>
       <button class="settings-btn" onclick="openSettings()" title="Configuración / Settings">⚙</button>
@@ -320,9 +358,10 @@
       </div>
       <div id="csv-status"></div>
     </div>
-    <div style="text-align:center;padding:6px 0;">
+    <div style="text-align:center;padding:6px 0;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;">
       <span style="font-size:12px;color:var(--muted)" id="demo-text">Don't have a CSV yet? </span>
       <button class="btn btn-ghost" style="font-size:10px;" onclick="loadDemo()" id="demo-btn">Load sample data →</button>
+      <button class="btn btn-ghost" style="font-size:10px;" onclick="goStep(1)" id="btn-how">¿Cómo conseguir el CSV? →</button>
     </div>
   </div>
 
@@ -341,6 +380,11 @@
         <button class="btn btn-ghost" id="btn-export" onclick="exportCSV()" disabled>↓ Export</button>
         <button class="btn btn-outline" id="btn-step4" onclick="goStep(4)" disabled>Send WhatsApp →</button>
       </div>
+    </div>
+    <!-- Barra de envío masivo (visible para todos) -->
+    <div class="send-all-bar" id="send-all-bar" style="display:none;">
+      <span class="send-all-info" id="bulk-info-inline">—</span>
+      <button class="wa-send" onclick="openBulkConfirm()" id="btn-send-all" disabled>📱 Enviar a todos los pendientes</button>
     </div>
     <div class="table-wrap" id="main-table-wrap">
       <table>
@@ -377,41 +421,55 @@
         </table>
       </div>
     </div>
-  </div>
 
-  <!-- STEP 4 -->
-  <div id="panel-4" style="display:none;">
-    <div class="panel">
-      <div class="panel-head" id="tpl-head">WhatsApp message</div>
-      <div class="field">
-        <label id="tpl-label">Message template</label>
-        <textarea id="msg-tpl"></textarea>
+    <!-- Sección de mensaje colapsable (accesible para todos en panel-3) -->
+    <div class="msg-section" id="msg-section-inline" style="display:none;">
+      <div class="msg-toggle-row">
+        <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);" id="msg-ready-label">Mensaje listo ✓</span>
+        <button class="msg-toggle-btn" onclick="toggleMsgEditor()" id="msg-toggle-btn">Editar mensaje ▾</button>
       </div>
-      <div style="margin-top:10px;">
-        <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase;" id="vars-label">Available variables — click to insert:</div>
-        <div class="tpl-vars">
-          <div class="tpl-var" onclick="insertVar('{nombre}')">&#123;nombre&#125;</div>
-          <div class="tpl-var" onclick="insertVar('{negocio}')">&#123;negocio&#125;</div>
-          <div class="tpl-var" onclick="insertVar('{ciudad}')">&#123;ciudad&#125;</div>
-          <div class="tpl-var" onclick="insertVar('{rubro}')">&#123;rubro&#125;</div>
-        </div>
-      </div>
-      <div class="bulk-foot">
-        <div class="bulk-info" id="bulk-info">—</div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-ghost" onclick="openPreview()" id="btn-preview">Preview</button>
-          <button class="btn btn-outline" onclick="openBulkConfirm()" id="btn-bulk">Send to all →</button>
+      <div class="msg-body" id="msg-body-inline" style="display:none;">
+        <div class="panel" style="margin-top:12px;">
+          <div class="panel-head" id="tpl-head">WhatsApp message</div>
+          <div class="field">
+            <label id="tpl-label">Message template</label>
+            <textarea id="msg-tpl"></textarea>
+          </div>
+          <div style="margin-top:10px;">
+            <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase;" id="vars-label">Variables:</div>
+            <div class="tpl-vars">
+              <div class="tpl-var" onclick="insertVar('{nombre}')">&#123;nombre&#125;</div>
+              <div class="tpl-var" onclick="insertVar('{negocio}')">&#123;negocio&#125;</div>
+              <div class="tpl-var" onclick="insertVar('{ciudad}')">&#123;ciudad&#125;</div>
+              <div class="tpl-var" onclick="insertVar('{rubro}')">&#123;rubro&#125;</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px;">
+            <button class="btn btn-ghost" onclick="openPreview()" id="btn-preview">Vista previa</button>
+          </div>
         </div>
       </div>
     </div>
+  </div>
 
+  <!-- STEP 4 (solo visible en modo admin) -->
+  <div id="panel-4" style="display:none;">
+    <div class="panel">
+      <div class="panel-head">Admin: envíos pendientes</div>
+      <div class="bulk-foot">
+        <div class="bulk-info" id="bulk-info">—</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" onclick="openBulkConfirm()" id="btn-bulk">Enviar a todos →</button>
+        </div>
+      </div>
+    </div>
     <div class="table-top" style="margin-top:20px;">
-      <div class="table-title" id="pending-title">Pending <span class="badge" id="pending-badge">0</span></div>
+      <div class="table-title" id="pending-title">Pendientes <span class="badge" id="pending-badge">0</span></div>
     </div>
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>#</th><th id="th2-name">Business</th><th id="th2-phone">Phone</th><th id="th2-status">Status</th><th id="th2-send">Send</th>
+          <th>#</th><th id="th2-name">Negocio</th><th id="th2-phone">Teléfono</th><th id="th2-status">Estado</th><th id="th2-send">Enviar</th>
         </tr></thead>
         <tbody id="pending-tbody"></tbody>
       </table>
@@ -445,20 +503,21 @@
   <div class="modal" style="max-width:520px;">
     <h3 id="mset-title">⚙ Configuración</h3>
     <div class="modal-body" style="margin-bottom:0;">
-      <div style="font-size:12px;line-height:1.8;margin-bottom:18px;">
-        Para guardar prospectos en <strong style="color:var(--gold)">Notion</strong> automáticamente, conectá un webhook de <strong>Make.com</strong> (gratis, 1000 ops/mes).<br>
-        <span style="font-size:10px;color:var(--muted);">En Make: Crear escenario → Webhooks (trigger) → Notion "Create a database item"</span>
+      <div style="font-size:12px;line-height:1.8;margin-bottom:16px;">
+        Pegá la URL de tu <strong style="color:var(--gold)">Cloudflare Worker</strong> para guardar en Notion automáticamente cada vez que se envía un WhatsApp.<br>
+        <span style="font-size:10px;color:var(--muted);">El archivo <strong>notion-worker.js</strong> del repo tiene las instrucciones paso a paso.</span>
       </div>
       <div class="field">
-        <label id="mset-wh-label">Make.com Webhook URL</label>
-        <input type="url" id="webhook-url" placeholder="https://hook.eu1.make.com/..." style="font-family:'DM Mono',monospace;font-size:12px;">
+        <label>Cloudflare Worker URL → Notion</label>
+        <input type="url" id="webhook-url" placeholder="https://kosmos-notion.xxxx.workers.dev" style="font-family:'DM Mono',monospace;font-size:12px;">
       </div>
       <div id="webhook-status" style="font-family:'DM Mono',monospace;font-size:10px;padding:6px 10px;border:1px solid var(--border2);display:none;margin-top:-6px;margin-bottom:12px;"></div>
-      <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;line-height:2;padding:10px;background:var(--bg);border:1px solid var(--border2);">
-        <span style="color:var(--gold)">Soledad</span> → idioma ES → agente "Soledad" en Notion<br>
-        <span style="color:var(--gold)">Silvina</span> → idioma IT → agente "Silvina" en Notion<br>
-        <span style="color:var(--gold)">Link Soledad:</span> <span id="mset-link-es" style="color:var(--blue);">...</span><br>
-        <span style="color:var(--gold)">Link Silvina:</span> <span id="mset-link-it" style="color:var(--blue);">...</span>
+      <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;line-height:2.2;padding:12px;background:var(--bg);border:1px solid var(--border2);">
+        <span style="color:var(--gold)">Soledad</span> → abre con <strong>?lang=es</strong> → Notion recibe agente "Soledad"<br>
+        <span style="color:var(--gold)">Silvina</span> → abre con <strong>?lang=it</strong> → Notion recibe agente "Silvina"<br>
+        <span style="color:var(--gold)">Admin</span> → abre con <strong>?admin=1&lang=es</strong><br><br>
+        <span style="color:var(--gold)">🔗 Soledad:</span> <span id="mset-link-es" style="color:var(--blue);word-break:break-all;">...</span><br>
+        <span style="color:var(--gold)">🔗 Silvina:</span> <span id="mset-link-it" style="color:var(--blue);word-break:break-all;">...</span>
       </div>
     </div>
     <div class="modal-foot" style="margin-top:18px;">
@@ -756,7 +815,9 @@ function selectLang(l) {
   document.getElementById('lang-screen').style.display = 'none';
   document.getElementById('main-app').style.display = 'block';
   applyLang();
-  goStep(1);
+  updateNotionStatus();
+  // Admin users start at step 1 (instructions); regular users go directly to upload
+  goStep(isAdmin ? 1 : 2);
 }
 
 function switchLang() {
@@ -851,6 +912,12 @@ function parseCSV(text) {
   document.getElementById('btn-step4').disabled = leads.length === 0;
   toast(`${leads.length} ${t.toastLeads}`);
   goStep(3);
+  // Show send-all bar and message section once leads are loaded
+  const bar = document.getElementById('send-all-bar');
+  if (bar) bar.style.display = leads.length > 0 ? 'flex' : 'none';
+  const msec = document.getElementById('msg-section-inline');
+  if (msec) msec.style.display = leads.length > 0 ? 'block' : 'none';
+  updateBulkInfoInline();
 }
 
 function parseLine(line, sep) {
@@ -932,8 +999,11 @@ function renderTable() {
       <td class="td-addr">${l.address}</td>
       <td class="td-phone">${l.phone||`<span style="color:var(--muted);font-size:11px;">${t.noPhone}</span>`}</td>
       <td>${l.status==='sent'?`<span class="tag tag-sent">${t.tagSent}</span>`:`<span class="tag tag-pending">${t.tagPending}</span>`}</td>
-      <td>${l.phone?`<button class="wa-btn ${l.status==='sent'?'sent':''}" onclick="sendOne(${allLeads.indexOf(l)})" ${l.status==='sent'?'disabled':''}>${l.status==='sent'?t.waSent:t.waSend}</button>`:`<span style="font-size:10px;color:var(--muted);">—</span>`}</td>
+      <td>${l.phone?`<button class="wa-send ${l.status==='sent'?'sent':''}" onclick="sendOne(${allLeads.indexOf(l)})" ${l.status==='sent'?'disabled':''}>
+        ${l.status==='sent'?'✓ Enviado':'📱 WhatsApp'}
+      </button>`:`<span style="font-size:10px;color:var(--muted);">—</span>`}</td>
     </tr>`).join('');
+  updateBulkInfoInline();
 }
 
 function renderPending() {
@@ -1025,7 +1095,8 @@ function updateStats() {
 }
 function updateBulkInfo() {
   const t = T[lang], n = leads.filter(l=>l.status==='pending'&&l.phone).length;
-  const el = document.getElementById('bulk-info'); if(el) el.textContent = t.bulkInfo(n);
+  const el = document.getElementById('bulk-info'); if(el) el.textContent = t.bulkInfo ? t.bulkInfo(n) : `${n}`;
+  updateBulkInfoInline();
 }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function toast(msg) {
@@ -1035,8 +1106,41 @@ function toast(msg) {
 }
 function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
 
-// Auto-detect lang from URL param e.g. ?lang=es
-const urlLang = new URLSearchParams(window.location.search).get('lang');
+// ── Notion status dot ─────────────────────────────────────────────
+function updateNotionStatus() {
+  const url = localStorage.getItem('kp_webhook');
+  const dot = document.getElementById('notion-dot');
+  const label = document.getElementById('notion-label');
+  if (dot) dot.classList.toggle('connected', !!url);
+  if (label) label.textContent = url ? 'Notion ✓' : 'Notion';
+  const statusEl = document.getElementById('notion-status');
+  if (statusEl) statusEl.title = url ? 'Notion conectado' : 'Notion sin configurar';
+}
+
+// ── Toggle editor de mensaje ───────────────────────────────────────
+function toggleMsgEditor() {
+  const body = document.getElementById('msg-body-inline');
+  const btn = document.getElementById('msg-toggle-btn');
+  const open = body && body.style.display !== 'none';
+  if (body) body.style.display = open ? 'none' : 'block';
+  if (btn) btn.textContent = open ? 'Editar mensaje ▾' : 'Ocultar ▴';
+}
+
+// ── Inline bulk info updater ───────────────────────────────────────
+function updateBulkInfoInline() {
+  const t = T[lang];
+  const n = leads.filter(l => l.status === 'pending' && l.phone).length;
+  const el = document.getElementById('bulk-info-inline');
+  if (el) el.textContent = t.bulkInfo ? t.bulkInfo(n) : `${n} pendientes`;
+  const btn = document.getElementById('btn-send-all');
+  if (btn) btn.disabled = n === 0;
+}
+
+// ── Admin mode + URL detection ─────────────────────────────────────
+const urlParams = new URLSearchParams(window.location.search);
+const urlLang = urlParams.get('lang');
+const isAdmin = urlParams.has('admin');
+if (isAdmin) document.body.classList.add('admin');
 if (urlLang && T[urlLang]) selectLang(urlLang);
 
 // ── Settings & Notion webhook ──────────────────────────────────────
@@ -1074,6 +1178,7 @@ function saveSettings() {
     toast('Webhook eliminado');
   }
   closeModal('modal-settings');
+  updateNotionStatus();
 }
 
 async function fireWebhook(lead, action) {
@@ -1088,6 +1193,7 @@ async function fireWebhook(lead, action) {
         nombre: lead.name,
         telefono: lead.phone,
         rubro: lead.category,
+        ciudad: lead.address.split(',').slice(-1)[0]?.trim() || lead.address,
         direccion: lead.address,
         sitio_web: lead.site || '',
         accion: action,
