@@ -186,6 +186,81 @@
     .steps .step span.step-label{display:none;}
     .kpis{gap:12px;}
   }
+
+  /* ── Admin mode: steps + gear ocultos para usuarios normales ── */
+  .steps{display:none;}
+  body.admin .steps{display:flex;}
+  .settings-btn{display:none;}
+  body.admin .settings-btn{display:grid;}
+  #step-4{display:none;}
+  body.admin #step-4{display:flex;}
+  #btn-export{display:none;}
+  body.admin #btn-export{display:inline-flex;}
+  #btn-step4{display:none;}
+  body.admin #btn-step4{display:inline-flex;}
+
+  /* ── Notion status dot ── */
+  .notion-dot{width:7px;height:7px;border-radius:50%;background:var(--muted2);display:inline-block;flex-shrink:0;transition:background 0.3s;}
+  .notion-dot.connected{background:var(--green);box-shadow:0 0 6px rgba(74,222,128,0.45);}
+  .notion-status{display:flex;align-items:center;gap:6px;font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:0.08em;cursor:default;}
+
+  /* ── Botón WhatsApp grande y verde ── */
+  .wa-send{background:#25D366;color:#fff;border:none;padding:9px 18px;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;letter-spacing:0.06em;transition:background 0.15s;white-space:nowrap;}
+  .wa-send:hover{background:#1db954;}
+  .wa-send.sent{background:transparent;color:var(--green);border:1px solid var(--green);cursor:default;padding:8px 17px;}
+  .wa-send:disabled{cursor:default;}
+
+  /* ── Sección de mensaje (colapsable, debajo de la tabla) ── */
+  .msg-section{border-top:1px solid var(--border);margin-top:24px;padding-top:18px;}
+  .msg-toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:0;}
+  .msg-toggle-btn{background:none;border:none;color:var(--muted);font-size:10px;font-family:'DM Mono',monospace;cursor:pointer;padding:0;letter-spacing:0.06em;}
+  .msg-toggle-btn:hover{color:var(--gold);}
+  .msg-body{margin-top:14px;}
+
+  /* ── Botón "enviar a todos" en la tabla ── */
+  .send-all-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-bottom:none;}
+  .send-all-info{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+
+  /* ── Pipeline states ── */
+  .status-sel{background:var(--bg);border:1px solid var(--border2);color:var(--text);font-size:9px;font-family:'DM Mono',monospace;padding:3px 5px;cursor:pointer;outline:none;width:100%;min-width:100px;}
+  .status-sel option{background:#111;color:var(--text);}
+  .tag-replied{background:rgba(125,211,252,0.1);color:#7dd3fc;}
+  .tag-interested{background:rgba(167,139,250,0.1);color:#a78bfa;}
+  .tag-proposal{background:rgba(249,115,22,0.1);color:#f97316;}
+  .tag-client{background:rgba(74,222,128,0.15);color:#4ade80;font-weight:700;}
+  .tag-lost{background:rgba(85,85,85,0.2);color:var(--muted);}
+
+  /* ── Score badge ── */
+  .score-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:8px;padding:2px 4px;font-weight:700;margin-right:4px;}
+  .score-hi{background:rgba(74,222,128,0.15);color:#4ade80;}
+  .score-mid{background:rgba(251,191,36,0.1);color:#fbbf24;}
+  .score-lo{background:rgba(248,113,113,0.1);color:#f87171;}
+
+  /* ── Follow-up badges ── */
+  .fu-warn{display:inline-block;font-family:'DM Mono',monospace;font-size:8px;padding:1px 4px;background:rgba(251,191,36,0.1);color:#fbbf24;margin-left:4px;}
+  .fu-late{display:inline-block;font-family:'DM Mono',monospace;font-size:8px;padding:1px 4px;background:rgba(248,113,113,0.1);color:#f87171;margin-left:4px;}
+
+  /* ── Notes ── */
+  .notes-btn{background:none;border:1px solid var(--border2);color:var(--muted);padding:3px 7px;font-size:9px;cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+  .notes-btn:hover{border-color:var(--gold);color:var(--gold);}
+  .notes-btn.has-note{border-color:rgba(201,169,110,0.4);color:var(--gold);}
+  .notes-area{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:8px 10px;font-size:11px;font-family:'DM Mono',monospace;outline:none;resize:vertical;min-height:54px;transition:border-color 0.2s;}
+  .notes-area:focus{border-color:var(--gold);}
+
+  /* ── Metrics bar ── */
+  .metrics-bar{display:flex;border:1px solid var(--border);margin-bottom:14px;overflow:hidden;}
+  .m-item{flex:1;padding:9px 6px;text-align:center;cursor:pointer;border-right:1px solid var(--border);transition:background 0.15s;}
+  .m-item:last-child{border-right:none;}
+  .m-item:hover{background:var(--gold-glow);}
+  .m-item.mactive{background:var(--gold-dim);}
+  .m-n{font-family:'DM Mono',monospace;font-size:16px;font-weight:700;}
+  .m-l{font-size:7px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;}
+
+  /* ── Template tabs ── */
+  .tpl-tabs{display:flex;border:1px solid var(--border2);margin-bottom:10px;overflow:hidden;}
+  .tpl-tab{flex:1;padding:7px 8px;font-size:9px;font-family:'DM Mono',monospace;letter-spacing:0.06em;text-transform:uppercase;border:none;background:transparent;color:var(--muted);cursor:pointer;border-right:1px solid var(--border2);transition:all 0.15s;}
+  .tpl-tab:last-child{border-right:none;}
+  .tpl-tab.active{background:var(--gold-dim);color:var(--gold);}
 </style>
 </head>
 <body>
@@ -245,6 +320,10 @@
         <div class="kpi"><div class="kpi-n" id="kpi-total">0</div><div class="kpi-l" id="kpi-l1">Imported</div></div>
         <div class="kpi"><div class="kpi-n" id="kpi-leads">0</div><div class="kpi-l" id="kpi-l2">No website</div></div>
         <div class="kpi"><div class="kpi-n" id="kpi-sent">0</div><div class="kpi-l" id="kpi-l3">Sent</div></div>
+      </div>
+      <div class="notion-status" id="notion-status" title="Notion CRM">
+        <span class="notion-dot" id="notion-dot"></span>
+        <span id="notion-label">Notion</span>
       </div>
       <button class="lang-switch-btn" onclick="switchLang()" id="lang-switch-btn">🌐 ES</button>
       <button class="settings-btn" onclick="openSettings()" title="Configuración / Settings">⚙</button>
@@ -320,9 +399,10 @@
       </div>
       <div id="csv-status"></div>
     </div>
-    <div style="text-align:center;padding:6px 0;">
+    <div style="text-align:center;padding:6px 0;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;">
       <span style="font-size:12px;color:var(--muted)" id="demo-text">Don't have a CSV yet? </span>
       <button class="btn btn-ghost" style="font-size:10px;" onclick="loadDemo()" id="demo-btn">Load sample data →</button>
+      <button class="btn btn-ghost" style="font-size:10px;" onclick="goStep(1)" id="btn-how">¿Cómo conseguir el CSV? →</button>
     </div>
   </div>
 
@@ -332,15 +412,49 @@
       <div class="chip active" onclick="setFilter('all',this)" id="f-all">All</div>
       <div class="chip" onclick="setFilter('pending',this)" id="f-pending">Pending</div>
       <div class="chip" onclick="setFilter('sent',this)" id="f-sent">Sent</div>
+      <div class="chip" onclick="setFilter('rating4',this)" id="f-rating4">★ 4+</div>
       <div class="chip" onclick="setFilter('weak',this)" id="f-weak">Con web</div>
       <div class="fsearch"><input type="text" id="search-input" placeholder="Search..." oninput="searchLeads(this.value)"></div>
+    </div>
+    <!-- Metrics bar (pipeline funnel) -->
+    <div id="metrics-bar" class="metrics-bar" style="display:none;">
+      <div class="m-item mactive" onclick="filterByPipeline('all')" id="mp-all">
+        <div class="m-n" id="m-total">0</div>
+        <div class="m-l" id="ml-total">Total</div>
+      </div>
+      <div class="m-item" onclick="filterByPipeline('pending')" id="mp-pending">
+        <div class="m-n" id="m-pending" style="color:var(--gold)">0</div>
+        <div class="m-l" id="ml-pending">Pendiente</div>
+      </div>
+      <div class="m-item" onclick="filterByPipeline('sent')" id="mp-sent">
+        <div class="m-n" id="m-sent" style="color:var(--green)">0</div>
+        <div class="m-l" id="ml-sent">Enviado</div>
+      </div>
+      <div class="m-item" onclick="filterByPipeline('replied')" id="mp-replied">
+        <div class="m-n" id="m-replied" style="color:#7dd3fc">0</div>
+        <div class="m-l" id="ml-replied">Respondió</div>
+      </div>
+      <div class="m-item" onclick="filterByPipeline('interested')" id="mp-interested">
+        <div class="m-n" id="m-interested" style="color:#a78bfa">0</div>
+        <div class="m-l" id="ml-interested">Interesado</div>
+      </div>
+      <div class="m-item" onclick="filterByPipeline('client')" id="mp-client">
+        <div class="m-n" id="m-client" style="color:#4ade80;font-weight:700">0</div>
+        <div class="m-l" id="ml-client">Cliente</div>
+      </div>
     </div>
     <div class="table-top" id="tbl-top-main">
       <div class="table-title" id="tbl-title">Leads without website <span class="badge" id="leads-badge">0</span></div>
       <div class="tactions">
+        <button class="btn btn-ghost" id="btn-nueva" onclick="nuevaBusqueda()" style="font-size:9px;display:none;">↺ Nueva</button>
         <button class="btn btn-ghost" id="btn-export" onclick="exportCSV()" disabled>↓ Export</button>
         <button class="btn btn-outline" id="btn-step4" onclick="goStep(4)" disabled>Send WhatsApp →</button>
       </div>
+    </div>
+    <!-- Barra de envío masivo (visible para todos) -->
+    <div class="send-all-bar" id="send-all-bar" style="display:none;">
+      <span class="send-all-info" id="bulk-info-inline">—</span>
+      <button class="wa-send" onclick="openBulkConfirm()" id="btn-send-all" disabled>📱 Enviar a todos los pendientes</button>
     </div>
     <div class="table-wrap" id="main-table-wrap">
       <table>
@@ -377,41 +491,56 @@
         </table>
       </div>
     </div>
-  </div>
 
-  <!-- STEP 4 -->
-  <div id="panel-4" style="display:none;">
-    <div class="panel">
-      <div class="panel-head" id="tpl-head">WhatsApp message</div>
-      <div class="field">
-        <label id="tpl-label">Message template</label>
-        <textarea id="msg-tpl"></textarea>
+    <!-- Sección de mensaje colapsable (accesible para todos en panel-3) -->
+    <div class="msg-section" id="msg-section-inline" style="display:none;">
+      <div class="msg-toggle-row">
+        <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);" id="msg-ready-label">Mensaje listo ✓</span>
+        <button class="msg-toggle-btn" onclick="toggleMsgEditor()" id="msg-toggle-btn">Editar mensaje ▾</button>
       </div>
-      <div style="margin-top:10px;">
-        <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase;" id="vars-label">Available variables — click to insert:</div>
-        <div class="tpl-vars">
-          <div class="tpl-var" onclick="insertVar('{nombre}')">&#123;nombre&#125;</div>
-          <div class="tpl-var" onclick="insertVar('{negocio}')">&#123;negocio&#125;</div>
-          <div class="tpl-var" onclick="insertVar('{ciudad}')">&#123;ciudad&#125;</div>
-          <div class="tpl-var" onclick="insertVar('{rubro}')">&#123;rubro&#125;</div>
-        </div>
-      </div>
-      <div class="bulk-foot">
-        <div class="bulk-info" id="bulk-info">—</div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-ghost" onclick="openPreview()" id="btn-preview">Preview</button>
-          <button class="btn btn-outline" onclick="openBulkConfirm()" id="btn-bulk">Send to all →</button>
+      <div class="msg-body" id="msg-body-inline" style="display:none;">
+        <div class="panel" style="margin-top:12px;">
+          <div class="panel-head" id="tpl-head">WhatsApp message</div>
+          <div id="tpl-tabs-wrap" class="tpl-tabs"></div>
+          <div class="field">
+            <label id="tpl-label">Message template</label>
+            <textarea id="msg-tpl" oninput="saveTplOnChange()"></textarea>
+          </div>
+          <div style="margin-top:10px;">
+            <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase;" id="vars-label">Variables:</div>
+            <div class="tpl-vars">
+              <div class="tpl-var" onclick="insertVar('{nombre}')">&#123;nombre&#125;</div>
+              <div class="tpl-var" onclick="insertVar('{negocio}')">&#123;negocio&#125;</div>
+              <div class="tpl-var" onclick="insertVar('{ciudad}')">&#123;ciudad&#125;</div>
+              <div class="tpl-var" onclick="insertVar('{rubro}')">&#123;rubro&#125;</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px;">
+            <button class="btn btn-ghost" onclick="openPreview()" id="btn-preview">Vista previa</button>
+          </div>
         </div>
       </div>
     </div>
+  </div>
 
+  <!-- STEP 4 (solo visible en modo admin) -->
+  <div id="panel-4" style="display:none;">
+    <div class="panel">
+      <div class="panel-head">Admin: envíos pendientes</div>
+      <div class="bulk-foot">
+        <div class="bulk-info" id="bulk-info">—</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" onclick="openBulkConfirm()" id="btn-bulk">Enviar a todos →</button>
+        </div>
+      </div>
+    </div>
     <div class="table-top" style="margin-top:20px;">
-      <div class="table-title" id="pending-title">Pending <span class="badge" id="pending-badge">0</span></div>
+      <div class="table-title" id="pending-title">Pendientes <span class="badge" id="pending-badge">0</span></div>
     </div>
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>#</th><th id="th2-name">Business</th><th id="th2-phone">Phone</th><th id="th2-status">Status</th><th id="th2-send">Send</th>
+          <th>#</th><th id="th2-name">Negocio</th><th id="th2-phone">Teléfono</th><th id="th2-status">Estado</th><th id="th2-send">Enviar</th>
         </tr></thead>
         <tbody id="pending-tbody"></tbody>
       </table>
@@ -445,20 +574,21 @@
   <div class="modal" style="max-width:520px;">
     <h3 id="mset-title">⚙ Configuración</h3>
     <div class="modal-body" style="margin-bottom:0;">
-      <div style="font-size:12px;line-height:1.8;margin-bottom:18px;">
-        Para guardar prospectos en <strong style="color:var(--gold)">Notion</strong> automáticamente, conectá un webhook de <strong>Make.com</strong> (gratis, 1000 ops/mes).<br>
-        <span style="font-size:10px;color:var(--muted);">En Make: Crear escenario → Webhooks (trigger) → Notion "Create a database item"</span>
+      <div style="font-size:12px;line-height:1.8;margin-bottom:16px;">
+        Pegá la URL de tu <strong style="color:var(--gold)">Cloudflare Worker</strong> para guardar en Notion automáticamente cada vez que se envía un WhatsApp.<br>
+        <span style="font-size:10px;color:var(--muted);">El archivo <strong>notion-worker.js</strong> del repo tiene las instrucciones paso a paso.</span>
       </div>
       <div class="field">
-        <label id="mset-wh-label">Make.com Webhook URL</label>
-        <input type="url" id="webhook-url" placeholder="https://hook.eu1.make.com/..." style="font-family:'DM Mono',monospace;font-size:12px;">
+        <label>Cloudflare Worker URL → Notion</label>
+        <input type="url" id="webhook-url" placeholder="https://kosmos-notion.xxxx.workers.dev" style="font-family:'DM Mono',monospace;font-size:12px;">
       </div>
       <div id="webhook-status" style="font-family:'DM Mono',monospace;font-size:10px;padding:6px 10px;border:1px solid var(--border2);display:none;margin-top:-6px;margin-bottom:12px;"></div>
-      <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;line-height:2;padding:10px;background:var(--bg);border:1px solid var(--border2);">
-        <span style="color:var(--gold)">Soledad</span> → idioma ES → agente "Soledad" en Notion<br>
-        <span style="color:var(--gold)">Silvina</span> → idioma IT → agente "Silvina" en Notion<br>
-        <span style="color:var(--gold)">Link Soledad:</span> <span id="mset-link-es" style="color:var(--blue);">...</span><br>
-        <span style="color:var(--gold)">Link Silvina:</span> <span id="mset-link-it" style="color:var(--blue);">...</span>
+      <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;line-height:2.2;padding:12px;background:var(--bg);border:1px solid var(--border2);">
+        <span style="color:var(--gold)">Soledad</span> → abre con <strong>?lang=es</strong> → Notion recibe agente "Soledad"<br>
+        <span style="color:var(--gold)">Silvina</span> → abre con <strong>?lang=it</strong> → Notion recibe agente "Silvina"<br>
+        <span style="color:var(--gold)">Admin</span> → abre con <strong>?admin=1&lang=es</strong><br><br>
+        <span style="color:var(--gold)">🔗 Soledad:</span> <span id="mset-link-es" style="color:var(--blue);word-break:break-all;">...</span><br>
+        <span style="color:var(--gold)">🔗 Silvina:</span> <span id="mset-link-it" style="color:var(--blue);word-break:break-all;">...</span>
       </div>
     </div>
     <div class="modal-foot" style="margin-top:18px;">
@@ -756,7 +886,20 @@ function selectLang(l) {
   document.getElementById('lang-screen').style.display = 'none';
   document.getElementById('main-app').style.display = 'block';
   applyLang();
-  goStep(1);
+  initTplTabs();
+  updateNotionStatus();
+  // Load saved data if any
+  if (loadData()) {
+    updateStats(); renderMetrics(); renderTable();
+    const bar=document.getElementById('send-all-bar'); if(bar) bar.style.display=leads.length>0?'flex':'none';
+    const msec=document.getElementById('msg-section-inline'); if(msec) msec.style.display=leads.length>0?'block':'none';
+    const nb=document.getElementById('btn-nueva'); if(nb) nb.style.display='inline-flex';
+    document.getElementById('btn-export').disabled=leads.length===0;
+    document.getElementById('btn-step4').disabled=leads.length===0;
+    goStep(3);
+  } else {
+    goStep(isAdmin ? 1 : 2);
+  }
 }
 
 function switchLang() {
@@ -795,7 +938,10 @@ function applyLang() {
   s('mprev-title', t.mprevTitle); s('mprev-close', t.mprevClose);
   s('th2-name', t.th2Name); s('th2-phone', t.th2Phone); s('th2-status', t.th2Status); s('th2-send', t.th2Send);
   s('lang-switch-btn', t.switchLabel);
-  document.getElementById('msg-tpl').value = t.defaultMsg;
+  // Load saved template or default
+  const storedTpls = localStorage.getItem(`kp_tpls_${lang}`);
+  const tpls = storedTpls ? JSON.parse(storedTpls) : { intro: t.defaultMsg };
+  document.getElementById('msg-tpl').value = tpls[currentTpl||'intro'] || t.defaultMsg;
   const si = document.getElementById('search-input');
   if (si) si.placeholder = t.searchPlaceholder;
   updateBulkInfo();
@@ -841,16 +987,26 @@ function parseCSV(text) {
     const cols = parseLine(lines[i], sep);
     const name = cl(cols[iN]), phone = cl(cols[iPhone]), site = iS>=0 ? cl(cols[iS]) : '';
     if (!name) continue;
-    allLeads.push({ id:i, name, phone, site, category: iC>=0?cl(cols[iC]):'—', address: iA>=0?cl(cols[iA]):'—', rating: iR>=0?cl(cols[iR]):'—', hasWebsite: site.length>3, status:'pending' });
+    const lead = { id:i, name, phone, site, category: iC>=0?cl(cols[iC]):'—', address: iA>=0?cl(cols[iA]):'—', rating: iR>=0?cl(cols[iR]):'—', hasWebsite: site.length>3, status:'pending', notes:'', notionPageId:null, sentAt:null, score:0 };
+    lead.score = scoreLead(lead);
+    allLeads.push(lead);
   }
   leads = allLeads.filter(l => !l.hasWebsite && l.phone);
   weakLeads = allLeads.filter(l => l.hasWebsite && l.phone);
-  updateStats();
+  saveData();
+  updateStats(); renderMetrics();
   showCSVStatus(t.statusOk(allLeads.length, leads.length));
   document.getElementById('btn-export').disabled = leads.length === 0;
   document.getElementById('btn-step4').disabled = leads.length === 0;
+  const nb=document.getElementById('btn-nueva'); if(nb) nb.style.display=leads.length>0?'inline-flex':'none';
   toast(`${leads.length} ${t.toastLeads}`);
   goStep(3);
+  // Show send-all bar and message section once leads are loaded
+  const bar = document.getElementById('send-all-bar');
+  if (bar) bar.style.display = leads.length > 0 ? 'flex' : 'none';
+  const msec = document.getElementById('msg-section-inline');
+  if (msec) msec.style.display = leads.length > 0 ? 'block' : 'none';
+  updateBulkInfoInline();
 }
 
 function parseLine(line, sep) {
@@ -887,8 +1043,11 @@ Veterinaria PetCare,+5493518889900,,veterinary,"Av. Vélez 1500",4.7`;
 // ── Filter / Search ───────────────────────────────────────────────
 function setFilter(mode, el) {
   filterMode = mode;
+  pipelineFilter = '';
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
+  document.querySelectorAll('.m-item').forEach(m=>m.classList.remove('mactive'));
+  const allM=document.getElementById('mp-all'); if(allM) allM.classList.add('mactive');
   const weakSec = document.getElementById('weak-section');
   const mainWrap = document.getElementById('main-table-wrap');
   const mainTop = document.getElementById('tbl-top-main');
@@ -907,8 +1066,13 @@ function setFilter(mode, el) {
 function searchLeads(q) { searchQuery = q.toLowerCase(); renderTable(); }
 function getVisible() {
   let l = leads;
-  if (filterMode==='pending') l = l.filter(x=>x.status==='pending');
-  if (filterMode==='sent') l = l.filter(x=>x.status==='sent');
+  if (pipelineFilter) {
+    l = l.filter(x=>x.status===pipelineFilter);
+  } else {
+    if (filterMode==='pending') l = l.filter(x=>x.status==='pending');
+    else if (filterMode==='sent') l = l.filter(x=>x.status!=='pending');
+    else if (filterMode==='rating4') l = l.filter(x=>parseFloat(x.rating)>=4);
+  }
   if (searchQuery) l = l.filter(x=>x.name.toLowerCase().includes(searchQuery)||x.category.toLowerCase().includes(searchQuery));
   return l;
 }
@@ -922,18 +1086,44 @@ function renderTable() {
 
   if (!list.length) {
     tbody.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="empty-icon">◈</div><div class="empty-text">${leads.length===0?t.emptyTable:t.emptyFilter}</div></div></td></tr>`;
-    return;
+    updateBulkInfoInline(); return;
   }
-  tbody.innerHTML = list.map((l,i) => `
-    <tr>
+  tbody.innerHTML = list.map((l,i) => {
+    const allIdx = allLeads.indexOf(l);
+    const score = l.score !== undefined ? l.score : scoreLead(l);
+    const scoreCls = score>=8?'score-hi':score>=6?'score-mid':'score-lo';
+    // Follow-up badge
+    let fuBadge = '';
+    if (l.sentAt && l.status!=='client' && l.status!=='lost') {
+      const d = Math.floor((Date.now()-l.sentAt)/86400000);
+      if (d>=6) fuBadge=`<span class="fu-late">🔴 ${d}d</span>`;
+      else if (d>=3) fuBadge=`<span class="fu-warn">⚠ ${d}d</span>`;
+    }
+    // Status select
+    const statusOpts = Object.entries(STATUSES).map(([k,v])=>`<option value="${k}"${k===l.status?' selected':''}>${v[lang]||v.en}</option>`).join('');
+    const stColor = STATUSES[l.status]?.color||'var(--text)';
+    // Notes
+    const hasNote = l.notes && l.notes.trim();
+    const waBtn = l.phone
+      ? `<button class="wa-send${l.status!=='pending'?' sent':''}" onclick="sendOne(${allIdx})">📱 WA</button>`
+      : `<span style="font-size:10px;color:var(--muted);">—</span>`;
+    return `<tr>
       <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">${String(i+1).padStart(2,'0')}</td>
-      <td class="td-name">${l.name}</td>
+      <td class="td-name"><span class="score-badge ${scoreCls}">${score}</span>${l.name}${fuBadge}</td>
       <td class="td-cat">${l.category}</td>
       <td class="td-addr">${l.address}</td>
       <td class="td-phone">${l.phone||`<span style="color:var(--muted);font-size:11px;">${t.noPhone}</span>`}</td>
-      <td>${l.status==='sent'?`<span class="tag tag-sent">${t.tagSent}</span>`:`<span class="tag tag-pending">${t.tagPending}</span>`}</td>
-      <td>${l.phone?`<button class="wa-btn ${l.status==='sent'?'sent':''}" onclick="sendOne(${allLeads.indexOf(l)})" ${l.status==='sent'?'disabled':''}>${l.status==='sent'?t.waSent:t.waSend}</button>`:`<span style="font-size:10px;color:var(--muted);">—</span>`}</td>
-    </tr>`).join('');
+      <td style="min-width:110px;"><select class="status-sel" style="color:${stColor}" onchange="setLeadStatus(${allIdx},this.value)">${statusOpts}</select></td>
+      <td><div style="display:flex;gap:5px;align-items:center;">${waBtn}<button class="notes-btn${hasNote?' has-note':''}" id="nb-${l.id}" onclick="toggleNotes(${l.id})">📝</button></div></td>
+    </tr>
+    <tr id="nr-${l.id}" style="display:none;">
+      <td colspan="7" style="padding:8px 13px;background:rgba(201,169,110,0.03);">
+        <textarea class="notes-area" id="nta-${l.id}" placeholder="Notas sobre este prospecto...">${l.notes||''}</textarea>
+        <button class="btn btn-ghost" style="margin-top:6px;font-size:9px;padding:5px 12px;" onclick="saveNote(${l.id})">Guardar nota ✓</button>
+      </td>
+    </tr>`;
+  }).join('');
+  updateBulkInfoInline();
 }
 
 function renderPending() {
@@ -970,9 +1160,10 @@ function sendOne(idx) {
   const l = allLeads[idx]; if(!l||!l.phone) return;
   const phone = l.phone.replace(/[\s\-()]/g,'').replace(/^\+/,'').replace(/^0+/,'');
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(buildMsg(l))}`, '_blank');
-  allLeads[idx].status = 'sent';
+  if (allLeads[idx].status === 'pending') allLeads[idx].status = 'sent';
+  if (!allLeads[idx].sentAt) allLeads[idx].sentAt = Date.now();
   fireWebhook(l, 'whatsapp_enviado');
-  updateStats(); renderTable(); renderPending();
+  saveData(); updateStats(); renderMetrics(); renderTable(); renderPending();
   toast(`${T[lang].toastSent} ${l.name}`);
 }
 
@@ -1009,8 +1200,8 @@ function insertVar(v) {
 // ── Export ────────────────────────────────────────────────────────
 function exportCSV() {
   const t = T[lang];
-  const rows = [['#',t.thName,t.thCat,t.thAddr,t.thPhone,'Rating',t.thStatus]];
-  leads.forEach((l,i) => rows.push([i+1,`"${l.name}"`,`"${l.category}"`,`"${l.address}"`,l.phone,l.rating,l.status==='sent'?t.tagSent:t.tagPending]));
+  const rows = [['#',t.thName,t.thCat,t.thAddr,t.thPhone,'Rating','Score',t.thStatus,'Notas']];
+  leads.forEach((l,i) => rows.push([i+1,`"${l.name}"`,`"${l.category}"`,`"${l.address}"`,l.phone,l.rating,l.score||'',statusLabel(l.status),`"${(l.notes||'').replace(/"/g,"'")}"`]));
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'}));
   a.download = `kosmos-leads-${new Date().toISOString().slice(0,10)}.csv`;
@@ -1025,7 +1216,8 @@ function updateStats() {
 }
 function updateBulkInfo() {
   const t = T[lang], n = leads.filter(l=>l.status==='pending'&&l.phone).length;
-  const el = document.getElementById('bulk-info'); if(el) el.textContent = t.bulkInfo(n);
+  const el = document.getElementById('bulk-info'); if(el) el.textContent = t.bulkInfo ? t.bulkInfo(n) : `${n}`;
+  updateBulkInfoInline();
 }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function toast(msg) {
@@ -1035,8 +1227,195 @@ function toast(msg) {
 }
 function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
 
-// Auto-detect lang from URL param e.g. ?lang=es
-const urlLang = new URLSearchParams(window.location.search).get('lang');
+// ── Notion status dot ─────────────────────────────────────────────
+function updateNotionStatus() {
+  const url = localStorage.getItem('kp_webhook');
+  const dot = document.getElementById('notion-dot');
+  const label = document.getElementById('notion-label');
+  if (dot) dot.classList.toggle('connected', !!url);
+  if (label) label.textContent = url ? 'Notion ✓' : 'Notion';
+  const statusEl = document.getElementById('notion-status');
+  if (statusEl) statusEl.title = url ? 'Notion conectado' : 'Notion sin configurar';
+}
+
+// ── Toggle editor de mensaje ───────────────────────────────────────
+function toggleMsgEditor() {
+  const body = document.getElementById('msg-body-inline');
+  const btn = document.getElementById('msg-toggle-btn');
+  const open = body && body.style.display !== 'none';
+  if (body) body.style.display = open ? 'none' : 'block';
+  if (btn) btn.textContent = open ? 'Editar mensaje ▾' : 'Ocultar ▴';
+}
+
+// ── Inline bulk info updater ───────────────────────────────────────
+function updateBulkInfoInline() {
+  const t = T[lang];
+  const n = leads.filter(l => l.status === 'pending' && l.phone).length;
+  const el = document.getElementById('bulk-info-inline');
+  if (el) el.textContent = t.bulkInfo ? t.bulkInfo(n) : `${n} pendientes`;
+  const btn = document.getElementById('btn-send-all');
+  if (btn) btn.disabled = n === 0;
+}
+
+// ── Pipeline statuses ────────────────────────────────────────────
+const STATUSES = {
+  pending:    { es:'Pendiente',     it:'In attesa',       en:'Pending',        de:'Ausstehend',    sk:'Čakajúce',  color:'var(--gold)' },
+  sent:       { es:'Enviado',       it:'Inviato',         en:'Sent',           de:'Gesendet',      sk:'Odoslané',  color:'var(--green)' },
+  replied:    { es:'Respondió',     it:'Ha risposto',     en:'Replied',        de:'Geantwortet',   sk:'Odpovedal', color:'#7dd3fc' },
+  interested: { es:'Interesado',    it:'Interessato',     en:'Interested',     de:'Interessiert',  sk:'Záujem',    color:'#a78bfa' },
+  proposal:   { es:'Propuesta',     it:'Proposta',        en:'Proposal',       de:'Angebot',       sk:'Ponuka',    color:'#f97316' },
+  client:     { es:'Cliente',       it:'Cliente',         en:'Client',         de:'Kunde',         sk:'Klient',    color:'#4ade80' },
+  lost:       { es:'No interesa',   it:'Non interessato', en:'Not interested', de:'Kein Interesse',sk:'Nezáujem',  color:'var(--muted)' },
+};
+function statusLabel(s){ const st=STATUSES[s]; return st?(st[lang]||st.en):s; }
+
+// ── Auto-scoring (1–10) ───────────────────────────────────────────
+function scoreLead(lead) {
+  let s = 5;
+  const r = parseFloat(lead.rating);
+  if (!isNaN(r)) { if(r>=4.5) s+=2; else if(r>=4.0) s+=1; else if(r<3.0) s-=1; }
+  if (lead.phone) s++;
+  if (!lead.hasWebsite) s++;
+  if (lead.category && lead.category!=='—') s++;
+  return Math.min(10, Math.max(1, s));
+}
+
+// ── localStorage persistence ──────────────────────────────────────
+function saveData() {
+  try { localStorage.setItem(`kp_data_${lang}`, JSON.stringify({allLeads, leads, weakLeads})); } catch(e){}
+}
+function loadData() {
+  try {
+    const d = JSON.parse(localStorage.getItem(`kp_data_${lang}`));
+    if (!d || !d.allLeads) return false;
+    allLeads = d.allLeads||[]; leads = d.leads||[]; weakLeads = d.weakLeads||[];
+    return allLeads.length > 0;
+  } catch(e){ return false; }
+}
+function clearData() {
+  localStorage.removeItem(`kp_data_${lang}`);
+  allLeads=[]; leads=[]; weakLeads=[];
+  updateStats(); renderTable();
+  ['send-all-bar','msg-section-inline','metrics-bar'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  const nb=document.getElementById('btn-nueva'); if(nb)nb.style.display='none';
+  document.getElementById('btn-export').disabled=true;
+  document.getElementById('btn-step4').disabled=true;
+}
+function nuevaBusqueda() {
+  const confirmMsgs={es:'¿Empezar nueva búsqueda? Se borrarán los datos de esta sesión.',it:'Nuova ricerca? I dati attuali verranno eliminati.',en:'Start a new search? Current data will be cleared.',de:'Neue Suche? Die aktuellen Daten werden gelöscht.',sk:'Nové hľadanie? Aktuálne dáta budú vymazané.'};
+  if (!confirm(confirmMsgs[lang]||confirmMsgs.en)) return;
+  clearData(); goStep(2);
+}
+
+// ── Pipeline filter (metrics bar) ────────────────────────────────
+let pipelineFilter = '';
+function filterByPipeline(status) {
+  pipelineFilter = status==='all'?'':status;
+  filterMode = 'all';
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  const allChip=document.getElementById('f-all'); if(allChip) allChip.classList.add('active');
+  document.querySelectorAll('.m-item').forEach(el=>el.classList.remove('mactive'));
+  const active=document.getElementById('mp-'+status); if(active) active.classList.add('mactive');
+  renderTable();
+}
+
+// ── Lead status update ────────────────────────────────────────────
+function setLeadStatus(allIdx, newStatus) {
+  if (!allLeads[allIdx]) return;
+  allLeads[allIdx].status = newStatus;
+  if (!allLeads[allIdx].sentAt && ['sent','replied','interested','proposal'].includes(newStatus)) {
+    allLeads[allIdx].sentAt = Date.now();
+  }
+  saveData(); updateStats(); renderMetrics(); renderTable();
+  const l = allLeads[allIdx];
+  if (l.notionPageId) updateNotionLead(l);
+}
+
+async function updateNotionLead(lead) {
+  const url = localStorage.getItem('kp_webhook');
+  if (!url || !lead.notionPageId) return;
+  const sm = {pending:'Nuevo',sent:'Contactado',replied:'Respondió',interested:'Interesado',proposal:'Propuesta enviada',client:'Cliente',lost:'No interesa'};
+  try {
+    await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({action:'actualizar_estado', pageId:lead.notionPageId, estado:sm[lead.status]||'Contactado', notas:lead.notes||''})
+    });
+  } catch(e){}
+}
+
+// ── Notes ─────────────────────────────────────────────────────────
+function toggleNotes(id) {
+  const row=document.getElementById(`nr-${id}`);
+  if(row) row.style.display = row.style.display==='none'?'table-row':'none';
+}
+function saveNote(id) {
+  const lead=allLeads.find(l=>l.id===id); if(!lead) return;
+  const ta=document.getElementById(`nta-${id}`);
+  if(ta){ lead.notes=ta.value; saveData(); if(lead.notionPageId) updateNotionLead(lead); }
+  toast('✓ Nota guardada');
+  const btn=document.getElementById(`nb-${id}`);
+  if(btn){ btn.className='notes-btn'+(lead.notes&&lead.notes.trim()?' has-note':''); }
+}
+
+// ── Metrics bar ───────────────────────────────────────────────────
+function renderMetrics() {
+  const bar=document.getElementById('metrics-bar'); if(!bar) return;
+  if(!leads.length){ bar.style.display='none'; return; }
+  bar.style.display='flex';
+  const c={pending:0,sent:0,replied:0,interested:0,proposal:0,client:0,lost:0};
+  leads.forEach(l=>{ if(c[l.status]!==undefined) c[l.status]++; });
+  document.getElementById('m-total').textContent=leads.length;
+  document.getElementById('m-pending').textContent=c.pending;
+  document.getElementById('m-sent').textContent=c.sent;
+  document.getElementById('m-replied').textContent=c.replied;
+  document.getElementById('m-interested').textContent=c.interested;
+  document.getElementById('m-client').textContent=c.client;
+  // Update metrics labels with current lang
+  const ml={es:['Total','Pendiente','Enviado','Respondió','Interesado','Cliente'],it:['Totale','In attesa','Inviato','Ha risposto','Interessato','Cliente'],en:['Total','Pending','Sent','Replied','Interested','Client'],de:['Gesamt','Ausstehend','Gesendet','Geantwortet','Interessiert','Kunde'],sk:['Celkom','Čakajúce','Odoslané','Odpovedal','Záujem','Klient']};
+  const labs=ml[lang]||ml.en;
+  ['ml-total','ml-pending','ml-sent','ml-replied','ml-interested','ml-client'].forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.textContent=labs[i]; });
+}
+
+// ── Template tabs ─────────────────────────────────────────────────
+const TPL_KEYS = ['intro','followup','proposal'];
+let currentTpl = 'intro';
+function getTplLabels() {
+  const L={es:['Presentación','Seguimiento','Propuesta'],it:['Presentazione','Follow-up','Proposta'],en:['Introduction','Follow-up','Proposal'],de:['Vorstellung','Nachfassen','Angebot'],sk:['Predstavenie','Sledovanie','Ponuka']};
+  return L[lang]||L.en;
+}
+function getDefaultTemplates(l) {
+  const t=T[l];
+  return {
+    intro: t.defaultMsg,
+    followup: t.followupMsg||`Hola {nombre}! 👋\n\nQuería hacer un seguimiento — ¿tuviste chance de ver mi mensaje sobre *{negocio}*?\n\nQuedamos disponibles para cualquier duda 😊\n\n— Kosmos Studio\nsomoskosmos.com`,
+    proposal: t.proposalMsg||`Hola {nombre}! Preparamos una propuesta para *{negocio}* ✦\n\n¿Tenés unos minutos esta semana para conversarla?\n\n— Kosmos Studio\nsomoskosmos.com`,
+  };
+}
+function initTplTabs() {
+  const wrap=document.getElementById('tpl-tabs-wrap'); if(!wrap) return;
+  const labels=getTplLabels();
+  wrap.innerHTML=TPL_KEYS.map((k,i)=>`<button class="tpl-tab${i===0?' active':''}" onclick="selectTpl('${k}')" id="tpl-tab-${i}">${labels[i]}</button>`).join('');
+  currentTpl='intro'; selectTpl('intro');
+}
+function selectTpl(key) {
+  currentTpl=key;
+  const stored=localStorage.getItem(`kp_tpls_${lang}`);
+  const templates=stored?JSON.parse(stored):getDefaultTemplates(lang);
+  document.getElementById('msg-tpl').value=templates[key]||'';
+  const idx=TPL_KEYS.indexOf(key);
+  document.querySelectorAll('.tpl-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+}
+function saveTplOnChange() {
+  const stored=localStorage.getItem(`kp_tpls_${lang}`);
+  const templates=stored?JSON.parse(stored):getDefaultTemplates(lang);
+  templates[currentTpl]=document.getElementById('msg-tpl').value;
+  localStorage.setItem(`kp_tpls_${lang}`,JSON.stringify(templates));
+}
+
+// ── Admin mode + URL detection ─────────────────────────────────────
+const urlParams = new URLSearchParams(window.location.search);
+const urlLang = urlParams.get('lang');
+const isAdmin = urlParams.has('admin');
+if (isAdmin) document.body.classList.add('admin');
 if (urlLang && T[urlLang]) selectLang(urlLang);
 
 // ── Settings & Notion webhook ──────────────────────────────────────
@@ -1074,6 +1453,7 @@ function saveSettings() {
     toast('Webhook eliminado');
   }
   closeModal('modal-settings');
+  updateNotionStatus();
 }
 
 async function fireWebhook(lead, action) {
@@ -1081,24 +1461,33 @@ async function fireWebhook(lead, action) {
   if (!webhookUrl) return;
   const agente = lang === 'es' ? 'Soledad' : lang === 'it' ? 'Silvina' : 'Kosmos';
   try {
-    await fetch(webhookUrl, {
+    const res = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         nombre: lead.name,
         telefono: lead.phone,
         rubro: lead.category,
+        ciudad: lead.address.split(',').slice(-1)[0]?.trim() || lead.address,
         direccion: lead.address,
         sitio_web: lead.site || '',
         accion: action,
         fecha: new Date().toLocaleString(),
         agente: agente,
         idioma: lang,
-        rating: lead.rating || ''
+        rating: lead.rating || '',
+        score: lead.score || 0
       })
     });
+    if (res.ok) {
+      const data = await res.json().catch(()=>({}));
+      if (data.pageId && !lead.notionPageId) {
+        lead.notionPageId = data.pageId;
+        saveData();
+      }
+    }
     toast((T[lang].notionSynced || '✓ Notion') + ' · ' + lead.name);
-  } catch(e) { /* silent — no internet or wrong URL */ }
+  } catch(e) { /* silent */ }
 }
 
 // ── Weak leads (businesses with website) ──────────────────────────
